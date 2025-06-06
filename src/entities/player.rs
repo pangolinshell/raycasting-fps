@@ -5,7 +5,7 @@ use sdl2::{keyboard::Scancode, rect::FPoint};
 
 #[derive(Debug,Clone, Copy)]
 pub struct Player {
-    position: (f32,f32),
+    pub position: (f32,f32),
     direction: f32,
 }
 
@@ -119,8 +119,9 @@ impl Entity for Player {
               (1, (map_y as f32 + 1.0 - pos_y) * delta_dist_y)
             };
 
+            let mut render_distance = 100;
             // perform DDA
-            while hit == false {
+            while hit == false && render_distance != 0{ 
                 //jump to next map square, either in x-direction, or in y-direction
                 if side_dist_x < side_dist_y {
                     side_dist_x += delta_dist_x;
@@ -128,7 +129,7 @@ impl Entity for Player {
                     side = false;
                 } else {
                     side_dist_y += delta_dist_y;
-                    map_y += step_y;
+                    map_y += step_y; 
                     side = true;
                 }
                 // check if ray has hit a wall
@@ -139,6 +140,10 @@ impl Entity for Player {
                 if has_hit_wall {
                     hit = true;
                 }
+                render_distance -= 1;
+            }
+            if render_distance <= 0 {
+                continue;
             }
             // if side == false {
             //     perp_wall_dist = side_dist_x - delta_dist_x;
