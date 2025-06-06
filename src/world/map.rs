@@ -19,6 +19,11 @@ impl Map {
         Self { layout}
     }
 
+    pub fn from_file(path: &str) -> Result<Self,Box<dyn std::error::Error>> {
+        let level = super::loader::Level::from_file(path)?;
+        Ok(Map::from_bytes(level.layout))
+    }
+
     pub fn get_tile(&self,x: i32,y:i32) -> Option<Tile> {
         for t in self.layout.clone() {
             if (t.pos.x,t.pos.y) == (x,y) {
