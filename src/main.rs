@@ -3,7 +3,7 @@ mod utils;
 mod frames;
 
 use multiplayer_fps_v3::display::Display;
-use multiplayer_fps_v3::world::Map;
+use multiplayer_fps_v3::world::{ Map};
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -23,11 +23,11 @@ fn clear(canvas: &mut Canvas<Window>) {
     canvas.clear();
 }
 
-fn display_fps(c: Point,font: &Font,fps: f64, canvas: &mut Canvas<Window>) -> Result<(),String> {
+fn display_fps(c: Point,font: &Font,fps: f64, canvas: &mut Canvas<Window>, player: Player) -> Result<(),String> {
     let tc = canvas.texture_creator();
-    let s = font.render(format!("fps: {:.0}",fps).as_str()).blended(Color::WHITE).unwrap();
+    let s = font.render(format!("fps: {:.0} pos: {:.2},{:.2}",fps,player.position.0,player.position.1).as_str()).blended(Color::WHITE).unwrap();
     let t= tc.create_texture_from_surface(s).unwrap();
-    canvas.copy(&t, None, Rect::new(c.x,c.y, 100, 20))
+    canvas.copy(&t, None, Rect::new(c.x,c.y, 200, 20))
 }
 
 fn event(e:&mut EventPump) -> Option<u32>{
@@ -41,37 +41,6 @@ fn event(e:&mut EventPump) -> Option<u32>{
         }
     }
     return None;
-}
-
-fn map() -> Map {
-    let world_map: Vec<Vec<u8>> = vec![
-    vec![1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1],
-    vec![1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1],
-    vec![1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    vec![1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-];
-
-    Map::from_bytes(world_map)
 }
 
 pub fn main() {
@@ -89,10 +58,9 @@ pub fn main() {
     let mut canvas = window.into_canvas().build().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
 
-    let map = map();
+    let map = Map::from_file("conf/map1.jsonc").unwrap();
     let mut player = Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0));
     let mut loop_ctrl = frames::FramesCtrl::init(60);
-
 
     loop {
         clear(&mut canvas);
@@ -108,7 +76,7 @@ pub fn main() {
 
 
         // -- end game loop --
-        display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas).unwrap();
+        display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,player).unwrap();
         canvas.present();
         loop_ctrl.end_frame();
     }
