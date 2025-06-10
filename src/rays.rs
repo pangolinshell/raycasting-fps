@@ -1,8 +1,6 @@
-use std::rc::Rc;
+use sdl2::{pixels::Color, rect::Rect};
 
-use sdl2::{cpuinfo::cpu_cache_line_size, pixels::Color, rect::Rect};
-
-use crate::{display::{self, TextureMap}, world::Map};
+use crate::{display::{self, TextureMap}};
 
 #[derive(Debug,Clone,Copy)]
 pub struct Ray {
@@ -67,10 +65,6 @@ impl display::Display for Rays{
             // let end = Point::new(x as i32, draw_end);
             // canvas.set_draw_color(color);
             // canvas.draw_line(strt, end)?;
-            let color = match &texture_map.get(ray.texture_code).unwrap() {
-                &display::TextureType::Texture(v) => v,
-                &display::TextureType::Color(c) => return Err("no texture".to_string()),
-            };
             
             let perp_wall_dist = ray.dist;
             let mut wall_x = if !ray.side {
@@ -93,9 +87,17 @@ impl display::Display for Rays{
                1,                // largeur (tu peux essayer 2 ou 3 aussi)
                (draw_end - draw_start) as u32,
             );
-            // canvas.set_draw_color(color);
-            canvas.copy(&color, Rect::new(tex_x, 0, 1, 64), rect)?;
-            // canvas.fill_rect(rect)?;
+            let texture = match texture_map.get(ray.texture_code) {
+                Some(t) => t,
+                None => &display::TextureType::Color(Color::GREEN),  
+            };
+            match &texture {
+                &display::TextureType::Texture(v) => canvas.copy(&v, Rect::new(tex_x, 0, 1, 64), rect)?,
+                &display::TextureType::Color(c) => {
+                    canvas.set_draw_color(*c);
+                    canvas.fill_rect(rect)?;
+                },
+            };
         }
         Ok(())
     }
