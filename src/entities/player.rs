@@ -1,4 +1,4 @@
-use crate::{rays::{Ray, Rays}, utils, world::Map};
+use crate::{ rays::{Ray, Rays}, utils, world::Map};
 
 use super::entities::{Entity,EntityType};
 use sdl2::{keyboard::Scancode, rect::FPoint};
@@ -76,12 +76,12 @@ impl Entity for Player {
         utils::angles::degrees_to_rad(66.0)
     }
 
-    fn cast_rays(&self,map: Map, w: u32) -> Rays {
+    fn cast_rays<'a>(&self,map: Map, w: u32) -> Rays {
         let mut rays: Vec<Ray> = Vec::new();
         let (pos_x,pos_y) = self.position;
         let (dir_x,dir_y) = utils::vecs::from_direction(self.direction);
         // let (plane_x,plane_y) =(0.0f32,0.66f32);
-        let fov_factor = 0.66; // tu peux jouer avec ça (0.5 à 1.0 typiquement)
+        let fov_factor = 0.5; // tu peux jouer avec ça 0.66 de (0.5 à 1.0 typiquement)
         let plane_x = -dir_y * fov_factor;
         let plane_y =  dir_x * fov_factor;
 
@@ -161,11 +161,11 @@ impl Entity for Player {
                 None => 0,
             };
             // // correction fisheye
-            // let corrected_dist = perp_wall_dist * (raydir_x * dir_x + raydir_y * dir_y)
+            // let corrected_dist = perp_wall_dist * (raydir_x * dir_x + raydir_y * dir_y);
             //     / ((raydir_x.powi(2) + raydir_y.powi(2)).sqrt() * (dir_x.powi(2) + dir_y.powi(2)).sqrt());
 
 
-            rays.push(Ray::new(perp_wall_dist, tc,side));
+            rays.push(Ray::new(perp_wall_dist, tc,side,(raydir_x,raydir_y),(pos_x,pos_y)));
         }
         Rays::from(rays)
     }

@@ -2,12 +2,12 @@ extern crate sdl2;
 mod utils;
 mod frames;
 
-use multiplayer_fps_v3::display::Display;
+use multiplayer_fps_v3::display::{Display, Minimap};
 use multiplayer_fps_v3::world::{ Map};
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::{Point, Rect};
+use sdl2::rect::{self, Point, Rect};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::EventPump;
@@ -62,22 +62,37 @@ pub fn main() {
     let map = Map::from_file("conf/map1.jsonc",&texture_creator).unwrap();
     let mut player = Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0));
     let mut loop_ctrl = frames::FramesCtrl::init(60);
+    let mut minimap = Minimap::new(map.clone(), 800/24, 800, Point::new(0, 0));
+
+    let minimap_win = video_subsystem.window("minimap", 800, 800).position_centered().build().unwrap();
+    let mut minimap_canvas = minimap_win.into_canvas().build().unwrap();
+
 
     loop {
         clear(&mut canvas);
+        minimap_canvas.set_draw_color(Color::BLACK);
+        minimap_canvas.clear();
         loop_ctrl.start_frame();
         if event(&mut event_pump) == Some(0) {
             break;
         }
 
         // -- start game loop --
+        {let ppos = player.position;
+        let rect = Rect::from_center(Point::new((ppos.0 * 800.0/24.0) as i32,(ppos.1 * 800.0/24.0) as i32), 800/26,800/26);
+        minimap_canvas.set_draw_color(Color::YELLOW);
+        minimap_canvas.fill_rect(rect).unwrap();}
+        
+        minimap.display(&mut minimap_canvas, None).unwrap();
         player.inputs(&mut event_pump, loop_ctrl.dtime as f32);
         let mut r = player.cast_rays(map.clone(), WIN_RES.0);
-        r.display(&mut canvas).unwrap();
+        r.display(&mut canvas,Some(map.textures.clone())).unwrap();
 
 
         // -- end game loop --
         display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,player).unwrap();
+
+        minimap_canvas.present();
         canvas.present();
         loop_ctrl.end_frame();
     }
