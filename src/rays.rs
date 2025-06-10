@@ -87,6 +87,7 @@ impl display::Display for Rays{
                1,                // largeur (tu peux essayer 2 ou 3 aussi)
                (draw_end - draw_start) as u32,
             );
+            // in case of unknown texture use a green cube
             let texture = match texture_map.get(ray.texture_code) {
                 Some(t) => t,
                 None => &display::TextureType::Color(Color::GREEN),  
