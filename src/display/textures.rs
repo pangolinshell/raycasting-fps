@@ -1,18 +1,20 @@
 use std::collections::HashMap;
-use sdl2::{pixels::Color, render::Texture};
+use sdl2::{pixels::Color, render::{Texture}};
+use std::rc::Rc;
 
 // const TEXT_SIZE: (u8,u8) = (64,64);
 
 pub enum TextureType<'a> {
     Color(Color),
-    Texture(&'a Texture<'a>),
+    Texture(Rc<Texture<'a>>),
 }
+
 
 impl<'a> Clone for TextureType<'a> {
     fn clone(&self) -> Self {
         match self {
             TextureType::Color(c) => TextureType::Color(*c),
-            TextureType::Texture(t) => TextureType::Texture(*t),
+            TextureType::Texture(t) => TextureType::Texture(t.clone()),
         }
     }
 }
@@ -23,12 +25,13 @@ impl<'a> Clone for TextureType<'a> {
 pub struct TextureMap<'a> {
     map : HashMap<u8,TextureType<'a>>,
 }
+
 impl<'a> TextureMap<'a> {
     pub fn new() -> Self {
         Self { map: HashMap::new() }
     }
 
-    pub fn add_texture(&mut self, code: u8, texture: &'a Texture<'a>) -> Result<(),String> {
+    pub fn add_texture(&mut self, code: u8, texture: Rc<Texture<'a>>) -> Result<(),String> {
         match self.map.get(&code)  {
         Some(v) => {
             match v {
@@ -56,7 +59,7 @@ impl<'a> TextureMap<'a> {
         Ok(())
     }
 
-    pub fn get(&self,code: u8) -> Option<&TextureType> {
+    pub fn get(&self,code: u8) -> Option<&TextureType<'a>> {
         self.map.get(&code)
     }
 }

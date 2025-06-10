@@ -1,4 +1,4 @@
-use sdl2::{pixels::Color, rect::Point};
+use sdl2::{pixels::Color, rect::{Rect}};
 
 use crate::display;
 
@@ -47,29 +47,27 @@ impl display::Display for Rays {
                 _ => Color::GRAY,
             };
 
-            if !ray.side {
-                let (r,g,b) = color.rgb();
-                color = Color::RGB(r/2, g/2, b/2);
+            // if !ray.side {
+            //     let (r,g,b) = color.rgb();
+            //     color = Color::RGB(r/2, g/2, b/2);
+            // }
+            // let strt = Point::new(x as i32, draw_start);
+            // let end = Point::new(x as i32, draw_end);
+            // canvas.set_draw_color(color);
+            // canvas.draw_line(strt, end)?;
+            if ray.side {
+               let (r,g,b) = color.rgb();
+               color = Color::RGB(r/2, g/2, b/2);
             }
-            let strt = Point::new(x as i32, draw_start);
-            let end = Point::new(x as i32, draw_end);
+            let rect = Rect::new(
+               x as i32,         // position X
+               draw_start,       // position Y
+               1,                // largeur (tu peux essayer 2 ou 3 aussi)
+               (draw_end - draw_start) as u32,
+            );
             canvas.set_draw_color(color);
-            canvas.draw_line(strt, end)?;
+            canvas.fill_rect(rect)?;
         }
         Ok(())
     }
 }
-
-// implementation plus optimisé
-//    if ray.side {
-//        let (r,g,b) = color.rgb();
-//        color = Color::RGB(r/2, g/2, b/2);
-//    }
-//    let rect = Rect::new(
-//        x as i32,         // position X
-//        draw_start,       // position Y
-//        1,                // largeur (tu peux essayer 2 ou 3 aussi)
-//        (draw_end - draw_start) as u32,
-//    );
-//    canvas.set_draw_color(color);
-//    canvas.fill_rect(rect)?;

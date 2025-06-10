@@ -1,13 +1,16 @@
-use sdl2::rect::{Point};
+use sdl2::{image::LoadTexture, rect::Point, render::TextureCreator, video::WindowContext};
+use crate::display::{self, TextureMap};
+use std::rc::Rc;
 
 use super::tiles::Tile;
 
-#[derive(Debug,Clone)]
-pub struct Map {
+#[derive(Clone)]
+pub struct Map<'a> {
     pub layout: Vec<Tile>,
+    pub textures: display::TextureMap<'a>
 }
 
-impl Map {
+impl<'a> Map<'a> {
     pub fn from_bytes(u8_layout: Vec<Vec<u8>>) -> Self {
         let mut layout: Vec<Tile> = Vec::new();
         for (y,line) in u8_layout.iter().enumerate() {
@@ -16,12 +19,18 @@ impl Map {
             layout.push(t);
         }
         }
-        Self { layout}
+        Self { layout, textures: TextureMap::new()}
     }
 
-    pub fn from_file(path: &str) -> Result<Self,Box<dyn std::error::Error>> {
+    pub fn from_file(path: &str,texture_creator: &'a TextureCreator<WindowContext>) -> Result<Self,Box<dyn std::error::Error>> {
         let level = super::loader::Level::from_file(path)?;
-        Ok(Map::from_bytes(level.layout))
+        let dir = level.textures.directory;
+        let mut map = Map::from_bytes(level.layout);
+        for (code,filename) in level.textures.tiles {
+            let texture = texture_creator.load_texture(format!("{}{}",dir,filename))?;
+            map.textures.add_texture(code, Rc::new(texture))?;
+        };
+        Ok(map)
     }
 
     pub fn get_tile(&self,x: i32,y:i32) -> Option<Tile> {

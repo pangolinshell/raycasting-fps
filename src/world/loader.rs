@@ -5,7 +5,7 @@ use std::{fs::File, io::Read};
 pub struct Level {
     pub layout: Vec<Vec<u8>>,
     spawnpoints: Vec<SpawnPoint>,
-    textures: Textures,
+    pub textures: Textures,
 }
 
 #[derive(Debug, Deserialize,Serialize)]
@@ -16,8 +16,8 @@ pub struct SpawnPoint {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Textures {
-    directory: String,
-    tiles: std::collections::HashMap<String, String>,
+    pub directory: String,
+    pub tiles: std::collections::HashMap<u8, String>,
 }
 
 impl Level {

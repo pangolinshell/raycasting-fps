@@ -57,8 +57,9 @@ pub fn main() {
 
     let mut canvas = window.into_canvas().build().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
+    let texture_creator = canvas.texture_creator();
 
-    let map = Map::from_file("conf/map1.jsonc").unwrap();
+    let map = Map::from_file("conf/map1.jsonc",&texture_creator).unwrap();
     let mut player = Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0));
     let mut loop_ctrl = frames::FramesCtrl::init(60);
 
