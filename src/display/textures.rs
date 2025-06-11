@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap};
 use sdl2::{pixels::Color, render::{Texture}};
 use std::rc::Rc;
 
@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 pub enum TextureType<'a> {
     Color(Color),
-    Texture(Rc<Texture<'a>>),
+    Texture(Rc<RefCell<Texture<'a>>>),
 }
 
 
@@ -31,7 +31,7 @@ impl<'a> TextureMap<'a> {
         Self { map: HashMap::new() }
     }
 
-    pub fn add_texture(&mut self, code: u8, texture: Rc<Texture<'a>>) -> Result<(),String> {
+    pub fn add_texture(&mut self, code: u8, texture: Rc<RefCell<Texture<'a>>>) -> Result<(),String> {
         match self.map.get(&code)  {
         Some(v) => {
             match v {

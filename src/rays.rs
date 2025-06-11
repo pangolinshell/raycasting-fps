@@ -93,7 +93,15 @@ impl display::Display for Rays{
                 None => &display::TextureType::Color(Color::GREEN),  
             };
             match &texture {
-                &display::TextureType::Texture(v) => canvas.copy(&v, Rect::new(tex_x, 0, 1, 64), rect)?,
+                &display::TextureType::Texture(v) => {
+                    let tmp = v.clone();
+                    let mut nv = tmp.borrow_mut();
+                    if ray.side {
+                        nv.set_color_mod(200,200,200);
+                    };
+                    canvas.copy(&nv, Rect::new(tex_x, 0, 1, 64), rect)?;
+                    nv.set_color_mod(255, 255,255);
+                },
                 &display::TextureType::Color(c) => {
                     canvas.set_draw_color(*c);
                     canvas.fill_rect(rect)?;

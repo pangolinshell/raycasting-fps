@@ -1,6 +1,7 @@
 use sdl2::{image::LoadTexture, rect::Point, render::TextureCreator, video::WindowContext};
 use crate::display::{self, TextureMap};
 use std::rc::Rc;
+use std::cell::RefCell;
 
 use super::tiles::Tile;
 
@@ -28,7 +29,7 @@ impl<'a> Map<'a> {
         let mut map = Map::from_bytes(level.layout);
         for (code,filename) in level.textures.tiles {
             let texture = texture_creator.load_texture(format!("{}{}",dir,filename))?;
-            map.textures.add_texture(code, Rc::new(texture))?;
+            map.textures.add_texture(code, Rc::new(RefCell::new(texture)))?;
         };
         Ok(map)
     }

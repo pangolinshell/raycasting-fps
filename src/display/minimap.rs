@@ -17,11 +17,10 @@ impl<'a> Minimap<'a> {
 }
 
 impl<'a> Display for Minimap<'a> {
+    #[allow(unused)]
     fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture: Option<TextureMap>) -> Result<(),String> {
         let vp = canvas.viewport();
         canvas.set_viewport(self.display);
-        // canvas.set_draw_color(Color::BLACK);
-        // canvas.clear();
         canvas.set_draw_color(Color::GRAY);
         for tile in self.map.layout.iter() {
             match tile.t_type {
