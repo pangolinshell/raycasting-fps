@@ -97,7 +97,7 @@ impl display::Display for Rays{
                     let tmp = v.clone();
                     let mut nv = tmp.borrow_mut();
                     if ray.side {
-                        nv.set_color_mod(200,200,200);
+                        nv.set_color_mod(150,150,150);
                     };
                     canvas.copy(&nv, Rect::new(tex_x, 0, 1, 64), rect)?;
                     nv.set_color_mod(255, 255,255);
