@@ -1,5 +1,6 @@
-use sdl2::rect::FPoint;
-use crate::world::Map;
+use std::{cell::RefCell, rc::Rc};
+
+use sdl2::{rect::FPoint, render::Texture};
 
 /// Represents the type of an entity in the game.
 /// 
@@ -28,16 +29,6 @@ pub trait Entity {
 
     /// Returns the field of view (FOV) of the entity, in radians.
     fn get_fov(&self) -> f32;
-    
-    /// Casts multiple rays from the entity's position within the given map, typically for field of view calculations.
-    ///
-    /// # Arguments
-    ///
-    /// * `map` - The map in which to cast the rays.
-    ///
-    /// # Returns
-    ///
-    /// * `Ok(Vec<f32>)` - A vector of distances to intersections for each ray.
-    /// * `Err(String)` - An error message if the ray casting fails.
-    fn cast_rays(&self, map: Map,w: u32) -> crate::rays::Rays;
+
+    fn texture(&self) -> Rc<RefCell<Texture>>;
 }

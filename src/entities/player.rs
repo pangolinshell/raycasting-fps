@@ -1,7 +1,5 @@
 use crate::{ rays::{Ray, Rays}, utils, world::Map};
-
-use super::entities::{Entity,EntityType};
-use sdl2::{keyboard::Scancode, rect::FPoint};
+use sdl2::{keyboard::Scancode};
 
 #[derive(Debug,Clone, Copy)]
 pub struct Player {
@@ -14,69 +12,7 @@ impl Player {
         Self { position: (pos_x,pos_y), direction: dir }
     }
 
-    pub fn inputs(&mut self,event_pump: &mut sdl2::EventPump,delta_time: f32) {
-        let keystate = event_pump.keyboard_state();
-        let (px, py) = self.position;
-        let speed = 6.0 * delta_time;
-        let dir_angle = self.direction;
-        let dir_x = dir_angle.cos();
-        let dir_y = dir_angle.sin();
-        let mut new_x = px;
-        let mut new_y = py;
-        let fov_factor = 0.66; // tu peux jouer avec ça (0.5 à 1.0 typiquement)
-        let plane_x = -dir_y * fov_factor;
-        let plane_y =  dir_x * fov_factor;
-
-        // Avant / arrière = direction
-        if keystate.is_scancode_pressed(Scancode::W) {
-            new_x += dir_x * speed;
-            new_y += dir_y * speed;
-        }
-        if keystate.is_scancode_pressed(Scancode::S) {
-            new_x -= dir_x * speed;
-            new_y -= dir_y * speed;
-        }
-
-        // Strafe droite / gauche = plan caméra
-        if keystate.is_scancode_pressed(Scancode::D) {
-            new_x += plane_x * speed;
-            new_y += plane_y * speed;
-        }
-        if keystate.is_scancode_pressed(Scancode::A) {
-            new_x -= plane_x * speed;
-            new_y -= plane_y * speed;
-        }
-
-        if keystate.is_scancode_pressed(Scancode::E) {
-            self.direction += utils::angles::degrees_to_rad(1.0);
-        }
-        if keystate.is_scancode_pressed(Scancode::Q) {
-            self.direction -= utils::angles::degrees_to_rad(1.0);
-        }
-
-        self.position.0 = new_x;
-        self.position.1 = new_y;
-    }
-}
-
-impl Entity for Player {
-    fn get_type(&self) -> EntityType {
-        EntityType::Player
-    }
-
-    fn direction(&self) -> f32 {
-        self.direction
-    }
-
-    fn position(&self) -> sdl2::rect::FPoint {
-        FPoint::new(self.position.0, self.position.1)
-    }
-
-    fn get_fov(&self) -> f32 {
-        utils::angles::degrees_to_rad(66.0)
-    }
-
-    fn cast_rays<'a>(&self,map: Map, w: u32) -> Rays {
+    pub fn cast_rays<'a>(&self,map: Map, w: u32) -> Rays {
         let mut rays: Vec<Ray> = Vec::new();
         let (pos_x,pos_y) = self.position;
         let (dir_x,dir_y) = utils::vecs::from_direction(self.direction);
@@ -153,8 +89,8 @@ impl Entity for Player {
             let perp_wall_dist = if !side {
                 side_dist_x - delta_dist_x
             } else {
-                side_dist_y - delta_dist_y
-}           ;
+                side_dist_y - delta_dist_y      
+            };
 
             let tc = match map.get_tvalue(map_x, map_y) {
                 Some(v) => v,
@@ -169,4 +105,69 @@ impl Entity for Player {
         }
         Rays::from(rays)
     }
+
+    pub fn inputs(&mut self,event_pump: &mut sdl2::EventPump,delta_time: f32) {
+        let keystate = event_pump.keyboard_state();
+        let (px, py) = self.position;
+        let speed = 6.0 * delta_time;
+        let dir_angle = self.direction;
+        let dir_x = dir_angle.cos();
+        let dir_y = dir_angle.sin();
+        let mut new_x = px;
+        let mut new_y = py;
+        let fov_factor = 0.66; // tu peux jouer avec ça (0.5 à 1.0 typiquement)
+        let plane_x = -dir_y * fov_factor;
+        let plane_y =  dir_x * fov_factor;
+
+        // Avant / arrière = direction
+        if keystate.is_scancode_pressed(Scancode::W) {
+            new_x += dir_x * speed;
+            new_y += dir_y * speed;
+        }
+        if keystate.is_scancode_pressed(Scancode::S) {
+            new_x -= dir_x * speed;
+            new_y -= dir_y * speed;
+        }
+
+        // Strafe droite / gauche = plan caméra
+        if keystate.is_scancode_pressed(Scancode::D) {
+            new_x += plane_x * speed;
+            new_y += plane_y * speed;
+        }
+        if keystate.is_scancode_pressed(Scancode::A) {
+            new_x -= plane_x * speed;
+            new_y -= plane_y * speed;
+        }
+
+        if keystate.is_scancode_pressed(Scancode::E) {
+            self.direction += utils::angles::degrees_to_rad(1.0);
+        }
+        if keystate.is_scancode_pressed(Scancode::Q) {
+            self.direction -= utils::angles::degrees_to_rad(1.0);
+        }
+
+        self.position.0 = new_x;
+        self.position.1 = new_y;
+    }
 }
+
+// impl Entity for Player {
+//     fn get_type(&self) -> EntityType {
+//         EntityType::Player
+//     }
+
+//     fn direction(&self) -> f32 {
+//         self.direction
+//     }
+
+//     fn position(&self) -> sdl2::rect::FPoint {
+//         FPoint::new(self.position.0, self.position.1)
+//     }
+
+//     fn get_fov(&self) -> f32 {
+//         utils::angles::degrees_to_rad(66.0)
+//     }
+
+//     fn texture(&self) -> std::rc::Rc<std::cell::RefCell<sdl2::render::Texture>> {
+//     }
+// }
