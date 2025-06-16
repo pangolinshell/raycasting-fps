@@ -150,24 +150,3 @@ impl Player {
         self.position.1 = new_y;
     }
 }
-
-// impl Entity for Player {
-//     fn get_type(&self) -> EntityType {
-//         EntityType::Player
-//     }
-
-//     fn direction(&self) -> f32 {
-//         self.direction
-//     }
-
-//     fn position(&self) -> sdl2::rect::FPoint {
-//         FPoint::new(self.position.0, self.position.1)
-//     }
-
-//     fn get_fov(&self) -> f32 {
-//         utils::angles::degrees_to_rad(66.0)
-//     }
-
-//     fn texture(&self) -> std::rc::Rc<std::cell::RefCell<sdl2::render::Texture>> {
-//     }
-// }
