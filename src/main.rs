@@ -85,10 +85,10 @@ pub fn main() {
         minimap_canvas.set_draw_color(Color::YELLOW);
         minimap_canvas.fill_rect(rect).unwrap();}
         
-        minimap.display(&mut minimap_canvas, HashMap::new(),None).unwrap();
+        minimap.display(&mut minimap_canvas).unwrap();
         player.inputs(&mut event_pump, loop_ctrl.dtime as f32);
         let mut r = player.cast_rays(map.clone(), WIN_RES.0);
-        r.display(&mut canvas, map.textures.clone(), Some(map.missing.clone())).unwrap();
+        r.display(&mut canvas).unwrap();
 
 
         // -- end game loop --
