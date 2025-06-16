@@ -103,7 +103,7 @@ impl Player {
                 Some(t) => t.clone(),
                 None =>  map.missing.clone(),
             };
-            rays.push(Ray::new(perp_wall_dist, tc,side,(raydir_x,raydir_y),(pos_x,pos_y),t.clone()));
+            rays.push(Ray::new(perp_wall_dist,side,(raydir_x,raydir_y),(pos_x,pos_y),t.clone()));
         }
         Rays::from(rays)
     }

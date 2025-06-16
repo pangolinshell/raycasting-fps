@@ -1,6 +1,6 @@
 use crate::world::{Map, TileType};
-use std::{cell::RefCell, rc::Rc, collections::HashMap};
-use sdl2::{pixels::Color, rect::{Point, Rect}, render::Texture};
+use std::rc::Rc;
+use sdl2::{pixels::Color, rect::{Point, Rect}};
 
 use super::display::Display;
 

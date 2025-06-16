@@ -1,4 +1,4 @@
-use std::{cell::RefCell,rc::Rc,collections::HashMap};
+use std::{cell::RefCell,rc::Rc};
 use sdl2::{rect::Rect, render::Texture};
 use crate::{display};
 
@@ -10,8 +10,6 @@ pub struct Ray<'a> {
 
     pos_x: f32,
     pos_y: f32,
-
-    texture_code: u8,
     texture: Rc<RefCell<Texture<'a>>>,
     side: bool,
 }
@@ -24,7 +22,6 @@ pub struct Rays<'a>{
 impl<'a> Ray<'a> {
     pub fn new(
         dist: f32,
-        tcode: u8,
         side: bool,
         ray_dir: (f32, f32),
         pos: (f32, f32),
@@ -32,7 +29,6 @@ impl<'a> Ray<'a> {
     ) -> Self {
         Self {
             dist,
-            texture_code: tcode,
             side,
             ray_dir_x: ray_dir.0,
             ray_dir_y: ray_dir.1,
@@ -79,11 +75,7 @@ impl<'a> display::Display<'a> for Rays<'a>{
                1,                // largeur (tu peux essayer 2 ou 3 aussi)
                (draw_end - draw_start) as u32,
             );
-            // in case of unknown texture use a green cube
-            // let texture = match texture.get(&ray.texture_code) {
-            //     Some(t) => t,
-            //     None => &missing,  
-            // };
+
             let texture = &ray.texture;
 
             let mut tmp_texture = texture.borrow_mut();

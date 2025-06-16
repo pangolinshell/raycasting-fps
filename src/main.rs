@@ -1,9 +1,6 @@
 extern crate sdl2;
 mod utils;
 mod frames;
-
-use std::collections::HashMap;
-
 use multiplayer_fps_v3::display::{Display, Minimap};
 use multiplayer_fps_v3::world::{ Map};
 use sdl2::pixels::Color;
