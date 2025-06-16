@@ -13,7 +13,7 @@ use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{Entity, Player};
+use multiplayer_fps_v3::entities::Player;
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
