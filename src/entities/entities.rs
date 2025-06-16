@@ -2,6 +2,7 @@ use std::{cell::{RefCell}, rc::Rc};
 
 use sdl2::render::Texture;
 
+#[derive(Clone)]
 pub struct Entity {
     pub id: u32,
     // position of the entities
