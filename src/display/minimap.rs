@@ -1,6 +1,6 @@
-use crate::{display::TextureMap, world::{Map, TileType}};
-use std::rc::Rc;
-use sdl2::{pixels::Color, rect::{Point, Rect}};
+use crate::world::{Map, TileType};
+use std::{cell::RefCell, rc::Rc, collections::HashMap};
+use sdl2::{pixels::Color, rect::{Point, Rect}, render::Texture};
 
 use super::display::Display;
 
@@ -16,9 +16,9 @@ impl<'a> Minimap<'a> {
     }
 }
 
-impl<'a> Display for Minimap<'a> {
+impl<'a> Display<'a> for Minimap<'a> {
     #[allow(unused)]
-    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture: Option<TextureMap>) -> Result<(),String> {
+    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture: HashMap<u8,Rc<RefCell<Texture<'a>>>>, missing: Option<Rc<RefCell<Texture<'a>>>>) -> Result<(),String> {
         let vp = canvas.viewport();
         canvas.set_viewport(self.display);
         canvas.set_draw_color(Color::GRAY);

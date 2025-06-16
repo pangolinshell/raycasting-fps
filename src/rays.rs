@@ -1,9 +1,12 @@
-use sdl2::{pixels::Color, rect::Rect};
+use std::{cell::RefCell, collections::HashMap};
+use std::rc::Rc;
+
+use sdl2::{pixels::Color, rect::Rect, render::Texture};
 
 use crate::{display::{self, TextureMap}};
 
-#[derive(Debug,Clone,Copy)]
-pub struct Ray {
+#[derive(Clone)]
+pub struct Ray<'a> {
     dist: f32,
     ray_dir_x: f32,
     ray_dir_y: f32,
@@ -12,34 +15,51 @@ pub struct Ray {
     pos_y: f32,
 
     texture_code: u8,
+    texture: Rc<RefCell<Texture<'a>>>,
     side: bool,
 }
 
 #[derive(Clone)]
-pub struct Rays{
-    rays: Vec<Ray>,
+pub struct Rays<'a>{
+    rays: Vec<Ray<'a>>,
 }
 
-impl Ray {
-    pub fn new(dist: f32,tcode: u8,side: bool, ray_dir: (f32,f32), pos: (f32,f32)) -> Self {
-        Self { dist, texture_code: tcode, side, ray_dir_x: ray_dir.0,ray_dir_y:ray_dir.1, pos_x: pos.0,pos_y: pos.1}
+impl<'a> Ray<'a> {
+    pub fn new(
+        dist: f32,
+        tcode: u8,
+        side: bool,
+        ray_dir: (f32, f32),
+        pos: (f32, f32),
+        texture: Rc<RefCell<Texture<'a>>>,
+    ) -> Self {
+        Self {
+            dist,
+            texture_code: tcode,
+            side,
+            ray_dir_x: ray_dir.0,
+            ray_dir_y: ray_dir.1,
+            pos_x: pos.0,
+            pos_y: pos.1,
+            texture: texture.clone(),
+        }
     }
 }
 
-impl Rays {
-    pub fn from(vec: Vec<Ray>) -> Self {
+impl<'a> Rays<'a> {
+    pub fn from(vec: Vec<Ray<'a>>) -> Self {
         Self { rays: vec }
     }
 }
 
-impl display::Display for Rays{
-    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, texture: Option<TextureMap>) -> Result<(),String> {
+impl<'a> display::Display<'a> for Rays<'a>{
+    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, texture: HashMap<u8,Rc<RefCell<Texture<'a>>>>,missing: Option<Rc<RefCell<Texture<'a>>>>) -> Result<(),String> {
+        let missing = match missing {
+            Some(v) => v,
+            None => return Err(String::from("missing missing"))
+        };
         let v_rect = canvas.viewport();
         let (_,h) = (v_rect.width(),v_rect.height());
-        let texture_map = match texture {
-                Some(t) => t,
-                None => return Err("you must give a texture map".to_string()),
-        };
         for (x,ray) in self.rays.iter().enumerate() {
             //Calculate height of line to draw on screen
             let line_height = (h as f32 /ray.dist) as i32;
@@ -48,6 +68,7 @@ impl display::Display for Rays{
             let draw_start = (-line_height/2 + h as i32 /2).clamp(0, h as i32 - 1);
 
             let draw_end = ( line_height/2 + h as i32/2).clamp(0, h as i32 -1);
+
 
             // let mut color = match ray.texture_code {
             //     1 => Color::RED,
@@ -88,25 +109,31 @@ impl display::Display for Rays{
                (draw_end - draw_start) as u32,
             );
             // in case of unknown texture use a green cube
-            let texture = match texture_map.get(ray.texture_code) {
+            let texture = match texture.get(&ray.texture_code) {
                 Some(t) => t,
-                None => &display::TextureType::Color(Color::GREEN),  
+                None => &missing,  
             };
-            match &texture {
-                &display::TextureType::Texture(v) => {
-                    let tmp = v.clone();
-                    let mut nv = tmp.borrow_mut();
-                    if ray.side {
-                        nv.set_color_mod(150,150,150);
-                    };
-                    canvas.copy(&nv, Rect::new(tex_x, 0, 1, 64), rect)?;
-                    nv.set_color_mod(255, 255,255);
-                },
-                &display::TextureType::Color(c) => {
-                    canvas.set_draw_color(*c);
-                    canvas.fill_rect(rect)?;
-                },
-            };
+            // match &texture {
+            //     &display::TextureType::Texture(v) => {
+            //         let tmp = v.clone();
+            //         let mut nv = tmp.borrow_mut();
+            //         if ray.side {
+            //             nv.set_color_mod(150,150,150);
+            //         };
+            //         canvas.copy(&nv, Rect::new(tex_x, 0, 1, 64), rect)?;
+            //         nv.set_color_mod(255, 255,255);
+            //     },
+            //     &display::TextureType::Color(c) => {
+            //         canvas.set_draw_color(*c);
+            //         canvas.fill_rect(rect)?;
+            //     },
+            // };
+            let mut tmp_texture = texture.borrow_mut();
+            if ray.side {
+                tmp_texture.set_color_mod(150, 150, 150);
+            }
+            canvas.copy(&tmp_texture, Rect::new(tex_x, 0, 1, 64), rect)?;
+            tmp_texture.set_color_mod(255, 255, 255);
         }
         Ok(())
     }

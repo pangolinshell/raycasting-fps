@@ -12,7 +12,7 @@ impl Player {
         Self { position: (pos_x,pos_y), direction: dir }
     }
 
-    pub fn cast_rays<'a>(&self,map: Map, w: u32) -> Rays {
+    pub fn cast_rays<'a>(&self, map: Map<'a>, w: u32) -> Rays<'a> {
         let mut rays: Vec<Ray> = Vec::new();
         let (pos_x,pos_y) = self.position;
         let (dir_x,dir_y) = utils::vecs::from_direction(self.direction);
@@ -99,9 +99,11 @@ impl Player {
             // // correction fisheye
             // let corrected_dist = perp_wall_dist * (raydir_x * dir_x + raydir_y * dir_y);
             //     / ((raydir_x.powi(2) + raydir_y.powi(2)).sqrt() * (dir_x.powi(2) + dir_y.powi(2)).sqrt());
-
-
-            rays.push(Ray::new(perp_wall_dist, tc,side,(raydir_x,raydir_y),(pos_x,pos_y)));
+            let t = match map.textures.get(&tc) {
+                Some(t) => t.clone(),
+                None =>  map.missing.clone(),
+            };
+            rays.push(Ray::new(perp_wall_dist, tc,side,(raydir_x,raydir_y),(pos_x,pos_y),t.clone()));
         }
         Rays::from(rays)
     }
