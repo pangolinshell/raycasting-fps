@@ -119,8 +119,6 @@ impl<'a> Entity<'a> {
     // }
 
     pub fn is_visible(&self,map: Map) -> bool {
-        println!("is in fov?: {}",self.is_in_fov());
-        println!("is behind wall?: {}",self.is_behind_a_wall(map.clone()));
         self.is_in_fov() && !self.is_behind_a_wall(map)
     }
 

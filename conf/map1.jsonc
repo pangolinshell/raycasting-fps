@@ -57,6 +57,10 @@
             "6": "mossy.png",
             "7": "mossy.png",
             "8": "bluestone.png"
-        }
+        },
+        "entities": {
+            "1": "pillar.png",
+            "2": "barrel.png"
+        }        
     }
 }

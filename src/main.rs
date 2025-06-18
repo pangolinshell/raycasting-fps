@@ -10,7 +10,7 @@ use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::rect::{FPoint, Point, Rect};
-use sdl2::render::{Canvas, Texture};
+use sdl2::render::{Canvas};
 use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
@@ -115,8 +115,6 @@ pub fn main() {
         player.borrow_mut().inputs(&mut event_pump, loop_ctrl.dtime as f32);
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas).unwrap();
-        print!("p: {:?}",barrel.player.borrow().position);
-        println!("visible: {}", barrel.is_visible(map.clone()));
 
         entites.render(&mut canvas).unwrap();
 
