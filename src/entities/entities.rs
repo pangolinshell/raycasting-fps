@@ -2,42 +2,37 @@ use std::{cell::RefCell, cmp::Ordering, rc::Rc};
 
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
 
-use crate::{display::Display, entities::Player, world::Map};
+use crate::{display::Display, entities::{self, Player}, world::Map};
 
 #[derive(Clone)]
 pub struct Entity<'a> {
     pub id: u32,
-    // position of the entities
-    pub x: f32,  
+    pub x: f32,
     pub y: f32,
-
-    // Direction where the entity is looking
     pub look: Option<f32>,
-
-    // texture of the entity
     pub texture: Rc<RefCell<Texture<'a>>>,
-
-    pub pov: Player
+    pub player: Rc<RefCell<Player>>, // << ici !
 }
+
 
 pub struct Entites<'a> {
     all: Vec<Entity<'a>>,
-    pub player: Player,
-    pub map: Map<'a>,
+    map: Map<'a>,
+    pub player: Rc<RefCell<Player>>
 }
 
 impl<'a> PartialEq for Entity<'a> {
     fn eq(&self, other: &Self) -> bool {
-        let delta_a = delta((self.x,self.y), self.pov.position);
-        let delta_b = delta((other.x,other.y), other.pov.position);
+        let delta_a = delta((self.x,self.y), self.player.borrow().position);
+        let delta_b = delta((other.x,other.y), other.player.borrow().position);
         delta_a == delta_b
     }
 }
 
 impl<'a> PartialOrd for Entity<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let delta_a = delta((self.x,self.y), self.pov.position);
-        let delta_b = delta((other.x,other.y), other.pov.position);
+        let delta_a = delta((self.x,self.y), self.player.borrow().position);
+        let delta_b = delta((other.x,other.y), other.player.borrow().position);
         if delta_a < delta_b {
             Some(Ordering::Less)
         } else if delta_a > delta_b {
@@ -54,8 +49,8 @@ impl<'a> Eq for Entity<'a> {}
 
 impl<'a> Ord for Entity<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
-        let delta_a = delta((self.x,self.y), self.pov.position);
-        let delta_b = delta((other.x,other.y), other.pov.position);
+        let delta_a = delta((self.x,self.y), self.player.borrow().position);
+        let delta_b = delta((other.x,other.y), other.player.borrow().position);
         if delta_a < delta_b {
             Ordering::Less
         } else if delta_a > delta_b {
@@ -74,6 +69,32 @@ fn delta(a: (f32, f32), b: (f32, f32)) -> f32 {
 }
 
 
+impl<'a> Entites<'a> {
+    pub fn init(map: Map<'a>,player: Rc<RefCell<Player>>) -> Self{
+        Self {
+            all: Vec::new(),
+            map,
+            player
+        }
+    }
+
+    pub fn render(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
+        // for entity in &mut self.all {
+        //     entity.update_camera(&camera);
+        // };
+        self.display(canvas)?;
+        Ok(())
+    }
+
+    pub fn add(&mut self, entity: Entity<'a>) {
+        self.all.push(entity.clone());
+    }
+
+    pub fn remove(&mut self,id: u32) {
+
+    }
+}
+
 
 impl<'a> Display<'a> for Entites<'a> {
     fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
@@ -89,20 +110,22 @@ impl<'a> Display<'a> for Entites<'a> {
 }
 
 impl<'a> Entity<'a> {
-    pub fn new(id: u32,pos: FPoint,texture:Rc<RefCell<Texture<'a>>>,camera: Player) -> Self {
-        Self { id, x: pos.x, y: pos.y, look: None, texture: texture.clone(), pov: camera }
+    pub fn new(id: u32,pos: FPoint,texture:Rc<RefCell<Texture<'a>>>,camera: Rc<RefCell<Player>>) -> Self {
+        Self { id, x: pos.x, y: pos.y, look: None, texture: texture.clone(), player:  camera}
     }
 
-    fn update_camera(&mut self,camera: Player) {
-        self.pov = camera;
-    }
+    // fn update_camera(&mut self,camera: &'a Player) {
+    //     self.player = camera;
+    // }
 
     pub fn is_visible(&self,map: Map) -> bool {
+        println!("is in fov?: {}",self.is_in_fov());
+        println!("is behind wall?: {}",self.is_behind_a_wall(map.clone()));
         self.is_in_fov() && !self.is_behind_a_wall(map)
     }
 
     pub fn is_behind_a_wall(&self, map: Map) -> bool {
-        let (start_x, start_y) = self.pov.position;
+        let (start_x, start_y) = self.player.borrow().position;
         let (end_x, end_y) = (self.x, self.y);
 
         let dir_x = end_x - start_x;
@@ -160,38 +183,39 @@ impl<'a> Entity<'a> {
 
     pub fn is_in_fov(&self) -> bool {
         use crate::utils::vecs::from_direction;
-
-        let fov_factor = self.pov.fov_factor;
-        let camera = self.pov;
-
+    
+        let camera = self.player.borrow(); // ← c'était self.player au lieu de self.pov
+        let fov_factor = camera.fov_factor;
+    
         let dir_vec = from_direction(camera.direction);
         let dx = self.x - camera.position.0;
         let dy = self.y - camera.position.1;
-
+    
         let dist = (dx * dx + dy * dy).sqrt();
         if dist == 0.0 {
             return true; // même position
         }
-
+    
         let to_entity = (dx / dist, dy / dist);
-
         let dot = dir_vec.0 * to_entity.0 + dir_vec.1 * to_entity.1;
-
-        let fov_rad = (fov_factor * std::f32::consts::PI).acos();
-
-        dot >= fov_rad.cos()
+    
+        let fov_rad = fov_factor * std::f32::consts::PI;
+        let half_fov_cos = (fov_rad / 2.0).cos(); // ← cosinus de l'angle demi-FOV
+    
+        dot >= half_fov_cos
     }
+    
 }
 
 impl<'a> Display<'a> for Entity<'a> {
     fn display(&mut self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(), String> {
         let v_rect = canvas.viewport();
         let (screen_w, screen_h) = (v_rect.width(), v_rect.height());
-        let (px, py) = self.pov.position;
-        let (dx, dy) = crate::utils::vecs::from_direction(self.pov.direction);
+        let (px, py) = self.player.borrow().position;
+        let (dx, dy) = crate::utils::vecs::from_direction(self.player.borrow().direction);
 
-        let fov_factor = self.pov.fov_factor;
-        let (dir_x,dir_y) = crate::utils::vecs::from_direction(self.pov.direction);
+        let fov_factor = self.player.borrow().fov_factor;
+        let (dir_x,dir_y) = crate::utils::vecs::from_direction(self.player.borrow().direction);
 
         let plane_x = -dir_y * fov_factor;
         let plane_y =  dir_x * fov_factor;
@@ -220,7 +244,6 @@ impl<'a> Display<'a> for Entity<'a> {
         let draw_end_x = (sprite_width / 2 + sprite_screen_x).clamp(0, screen_w as i32 - 1);
 
         let texture = self.texture.clone();
-        let tex = texture.borrow();
 
         let src_rect = Rect::new(0, 0, 64, 64); // texture carrée
 
@@ -231,7 +254,8 @@ impl<'a> Display<'a> for Entity<'a> {
             (draw_end_y - draw_start_y) as u32,
         );
 
-        canvas.copy(&tex, src_rect, dst_rect)?;
+        let tex_ref = texture.borrow();
+        canvas.copy(&*tex_ref, src_rect, dst_rect)?;
         Ok(())
     }
 }

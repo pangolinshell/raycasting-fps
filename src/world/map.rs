@@ -31,7 +31,7 @@ impl<'a> Map<'a> {
         let level = super::loader::Level::from_file(path)?;
         let dir = level.textures.directory;
         
-    let mut missing = texture_creator
+        let mut missing = texture_creator
         .create_texture_streaming(PixelFormatEnum::RGBA8888, 64, 64)
         .expect("Erreur lors de la création de la texture");
 
@@ -46,8 +46,8 @@ impl<'a> Map<'a> {
                     buffer[offset + 3] = 255; // Alpha
                 }
             }
-            })
-            .expect("Erreur lors du lock de la texture");
+        })
+        .expect("Erreur lors du lock de la texture");
         let mut map = Map::from_bytes(level.layout,Rc::new(RefCell::new(missing)));
         for (code, filename) in level.textures.tiles {
             let texture = texture_creator.load_texture(format!("{}{}", dir, filename))?;
