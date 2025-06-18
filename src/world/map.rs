@@ -1,5 +1,5 @@
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::render::{Texture, TextureAccess};
+use sdl2::render::Texture;
 use sdl2::{image::LoadTexture, rect::Point, render::TextureCreator, video::WindowContext};
 use crate::error;
 use std::rc::Rc;
