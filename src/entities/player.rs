@@ -117,7 +117,7 @@ impl Player {
         let dir_y = dir_angle.sin();
         let mut new_x = px;
         let mut new_y = py;
-        let fov_factor = 0.66; // tu peux jouer avec ça (0.5 à 1.0 typiquement)
+        let fov_factor = 0.5; // tu peux jouer avec ça (0.5 à 1.0 typiquement)
         let plane_x = -dir_y * fov_factor;
         let plane_y =  dir_x * fov_factor;
 

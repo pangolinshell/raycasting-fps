@@ -30,13 +30,24 @@ impl<'a> Map<'a> {
     pub fn from_file(path: &str, texture_creator: &'a TextureCreator<WindowContext>) -> Result<Self, Box<dyn std::error::Error>> {
         let level = super::loader::Level::from_file(path)?;
         let dir = level.textures.directory;
-        let missing = texture_creator
-        .create_texture(
-            PixelFormatEnum::RGBA8888,
-            TextureAccess::Streaming,
-            64,
-            64,
-        )?;
+        
+    let mut missing = texture_creator
+        .create_texture_streaming(PixelFormatEnum::RGBA8888, 64, 64)
+        .expect("Erreur lors de la création de la texture");
+
+        missing
+            .with_lock(None, |buffer: &mut [u8], pitch: usize| {
+            for y in 0..64 {
+                for x in 0..64 {
+                    let offset = y * pitch + x * 4;
+                    buffer[offset] = 0;       // Rouge
+                    buffer[offset + 1] = 255; // Vert
+                    buffer[offset + 2] = 0;   // Bleu
+                    buffer[offset + 3] = 255; // Alpha
+                }
+            }
+            })
+            .expect("Erreur lors du lock de la texture");
         let mut map = Map::from_bytes(level.layout,Rc::new(RefCell::new(missing)));
         for (code, filename) in level.textures.tiles {
             let texture = texture_creator.load_texture(format!("{}{}", dir, filename))?;

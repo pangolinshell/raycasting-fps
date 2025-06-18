@@ -1,8 +1,8 @@
 use std::{cell::RefCell, cmp::Ordering, rc::Rc};
 
-use sdl2::{rect::{FPoint, Point}, render::Texture};
+use sdl2::{rect::FPoint, render::Texture};
 
-use crate::{display::Display, entities::Player};
+use crate::{display::Display, entities::Player, world::Map};
 
 #[derive(Clone)]
 pub struct Entity<'a> {
@@ -77,13 +77,23 @@ fn delta(a: (f32, f32), b: (f32, f32)) -> f32 {
 impl<'a> Display<'a> for Entites<'a> {
     fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
         self.all.sort();
-        
         todo!()
     }
+
 }
 
 impl<'a> Entity<'a> {
-    pub fn new(id: u32,pos: FPoint,texture:Rc<RefCell<Texture<'a>>>,player: Player) -> Self {
-        Self { id, x: pos.x, y: pos.y, look: None, texture: texture.clone(), pov: player }
+    pub fn new(id: u32,pos: FPoint,texture:Rc<RefCell<Texture<'a>>>,camera: Player) -> Self {
+        Self { id, x: pos.x, y: pos.y, look: None, texture: texture.clone(), pov: camera }
+    }
+
+    fn update_camera(&mut self,camera: Player) {
+        self.pov = camera;
+    }
+
+    pub fn is_visible(&self,map: Map,camera: Player) -> bool {
+        let pov_factor = 0.5;
+        let pov = self.pov;
+        todo!()
     }
 }
