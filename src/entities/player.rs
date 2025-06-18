@@ -4,12 +4,13 @@ use sdl2::{keyboard::Scancode};
 #[derive(Debug,Clone, Copy)]
 pub struct Player {
     pub position: (f32,f32),
-    direction: f32,
+    pub direction: f32,
+    pub fov_factor: f32,
 }
 
 impl Player {
     pub fn new(pos_x: f32,pos_y: f32,dir: f32) -> Self {
-        Self { position: (pos_x,pos_y), direction: dir }
+        Self { position: (pos_x,pos_y), direction: dir, fov_factor: 0.5 }
     }
 
     pub fn cast_rays<'a>(&self, map: Map<'a>, w: u32) -> Rays<'a> {
