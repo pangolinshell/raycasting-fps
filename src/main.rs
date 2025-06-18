@@ -1,18 +1,21 @@
 extern crate sdl2;
 mod utils;
 mod frames;
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use multiplayer_fps_v3::display::{Display, Minimap};
 use multiplayer_fps_v3::world::{ Map};
-use sdl2::pixels::Color;
+use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::{Point, Rect};
-use sdl2::render::Canvas;
+use sdl2::rect::{FPoint, Point, Rect};
+use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::Player;
+use multiplayer_fps_v3::entities::{Player,Entity};
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
@@ -66,6 +69,14 @@ pub fn main() {
     let minimap_win = video_subsystem.window("minimap", 800, 800).position_centered().build().unwrap();
     let mut minimap_canvas = minimap_win.into_canvas().build().unwrap();
 
+    let placeholder = texture_creator
+        .create_texture(
+            PixelFormatEnum::RGBA8888,
+            sdl2::render::TextureAccess::Streaming,
+            64,
+            64,
+        ).unwrap();
+    let mut barrel = Entity::new(0, FPoint::new(2.5, 2.5), Rc::new(RefCell::new(placeholder)), player);
 
     loop {
         clear(&mut canvas);
@@ -86,7 +97,6 @@ pub fn main() {
         player.inputs(&mut event_pump, loop_ctrl.dtime as f32);
         let mut r = player.cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas).unwrap();
-
 
         // -- end game loop --
         display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,player).unwrap();
