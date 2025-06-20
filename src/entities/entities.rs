@@ -2,7 +2,7 @@ use std::{cell::RefCell, cmp::Ordering, rc::Rc};
 
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
 
-use crate::{display::Display, entities::{self, Player}, world::Map};
+use crate::{display::Display, entities::Player, world::Map};
 
 #[derive(Clone)]
 pub struct Entity<'a> {
@@ -79,9 +79,6 @@ impl<'a> Entites<'a> {
     }
 
     pub fn render(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
-        // for entity in &mut self.all {
-        //     entity.update_camera(&camera);
-        // };
         self.display(canvas)?;
         Ok(())
     }
@@ -91,7 +88,7 @@ impl<'a> Entites<'a> {
     }
 
     pub fn remove(&mut self,id: u32) {
-
+        todo!("remove entity of id '{}'",id)
     }
 }
 
