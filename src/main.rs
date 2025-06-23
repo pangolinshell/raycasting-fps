@@ -15,7 +15,9 @@ use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{Entites, Entity, Player};
+use multiplayer_fps_v3::entities::{
+    // Entites, 
+    self, Barrel, Entity, Player};
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
@@ -63,13 +65,14 @@ pub fn main() {
 
     let map = Map::from_file("conf/map2.jsonc",&texture_creator).unwrap();
     let player = Rc::new(RefCell::new(Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0))));
+    entities::init_player(player.clone());
     let mut loop_ctrl = frames::FramesCtrl::init(60);
     let mut minimap = Minimap::new(map.clone(), 800/24, 800, Point::new(0, 0));
 
     let minimap_win = video_subsystem.window("minimap", 800, 800).position_centered().build().unwrap();
     let mut minimap_canvas = minimap_win.into_canvas().build().unwrap();
 
-    let mut entites = Entites::init( map.clone(),player.clone());
+    // let mut entites = Entites::init( map.clone(),player.clone());
 
     let mut placeholder = texture_creator
         .create_texture_streaming(PixelFormatEnum::RGBA8888, 64, 64)
@@ -88,9 +91,11 @@ pub fn main() {
             }
         })
         .expect("Erreur lors du lock de la texture");
-    let barrel = Entity::new(0, FPoint::new(13.5, 16.5), Rc::new(RefCell::new(placeholder)), player.clone());
+    // let barrel = Entity::new(0, FPoint::new(13.5, 16.5), Rc::new(RefCell::new(placeholder)), player.clone());
+
+    let barrel = Barrel::new(13.5, 16.5, &texture_creator).unwrap();
     
-    entites.add(barrel.clone());
+    // entites.add(barrel.clone());
 
     loop {
         clear(&mut canvas);
@@ -108,7 +113,7 @@ pub fn main() {
             minimap_canvas.set_draw_color(Color::YELLOW);
             minimap_canvas.fill_rect(rect).unwrap();
             minimap_canvas.set_draw_color(Color::GREEN);
-            minimap_canvas.fill_rect(Rect::from_center(Point::new((barrel.x * 800.0/24.0) as i32, (barrel.y * 800.0/24.0) as i32), 30, 30)).unwrap();
+            // minimap_canvas.fill_rect(Rect::from_center(Point::new((barrel.x * 800.0/24.0) as i32, (barrel.y * 800.0/24.0) as i32), 30, 30)).unwrap();
         }
         
         minimap.display(&mut minimap_canvas).unwrap();
@@ -116,7 +121,7 @@ pub fn main() {
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas).unwrap();
 
-        entites.render(&mut canvas).unwrap();
+        // entites.render(&mut canvas).unwrap();
 
         // -- end game loop --
         display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,*player.borrow()).unwrap();

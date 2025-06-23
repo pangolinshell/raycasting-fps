@@ -41,13 +41,13 @@ fn player_fov_factor() -> f32 {
     get_player().borrow().fov_factor
 }
 
-pub trait Entity {
+pub trait Entity<'a> {
     fn position(&self) -> (f32,f32);
-    fn direction(&self) -> f32;
-    fn texture(&self) -> Rc<RefCell<Texture<'_>>>;
+    fn direction(&self) -> Option<f32>;
+    fn texture(&self) -> Rc<RefCell<Texture<'a>>>;
 }
 
-impl<'a> Display<'a> for dyn Entity {
+impl<'a> Display<'a> for dyn Entity<'a> {
     fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
         let v_rect = canvas.viewport();
         let (screen_w, screen_h) = (v_rect.width(), v_rect.height());
@@ -99,7 +99,7 @@ impl<'a> Display<'a> for dyn Entity {
     }
 }
 
-impl dyn Entity {
+impl<'a> dyn Entity<'a> {
     pub fn distance_to_player(&self,player: &Player) -> f32 {
         let (p_x,p_y) = player.position;
         let (s_x,s_y) = self.position();
@@ -114,4 +114,4 @@ impl dyn Entity {
             dist_a.partial_cmp(&dist_b).unwrap_or(std::cmp::Ordering::Equal)
         });
     }
-}
+} 
