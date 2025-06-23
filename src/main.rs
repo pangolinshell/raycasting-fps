@@ -93,7 +93,7 @@ pub fn main() {
         .expect("Erreur lors du lock de la texture");
     // let barrel = Entity::new(0, FPoint::new(13.5, 16.5), Rc::new(RefCell::new(placeholder)), player.clone());
 
-    let barrel = Barrel::new(13.5, 16.5, &texture_creator).unwrap();
+    let mut barrel = Barrel::new(13.5, 16.5, &texture_creator).unwrap();
     
     // entites.add(barrel.clone());
 
@@ -120,6 +120,8 @@ pub fn main() {
         player.borrow_mut().inputs(&mut event_pump, loop_ctrl.dtime as f32);
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas).unwrap();
+
+        barrel.display(&map,&mut canvas).unwrap();
 
         // entites.render(&mut canvas).unwrap();
 
