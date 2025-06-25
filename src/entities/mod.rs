@@ -1,10 +1,9 @@
-mod entities;
 mod player;
-mod entity;
+mod kayou;
 mod barrel;
+mod entities;
 
-// pub use entities::{Entity,EntityType};
 pub use player::Player;
-// pub use entities::{Entity,Entites};
-pub use entity::{Entity,init_player};
-pub use barrel::Barrel;
+// pub use barrel::Barrel;
+pub use barrel::new_barrel;
+pub use kayou::Kayou;

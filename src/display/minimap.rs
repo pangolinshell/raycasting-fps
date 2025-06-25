@@ -1,4 +1,4 @@
-use crate::world::{Map, TileType};
+use crate::{entities::Player, world::{Map, TileType}};
 use std::rc::Rc;
 use sdl2::{pixels::Color, rect::{Point, Rect}};
 
@@ -18,7 +18,7 @@ impl<'a> Minimap<'a> {
 
 impl<'a> Display<'a> for Minimap<'a> {
     #[allow(unused)]
-    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
+    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, from: Option<Player>, map: Option<&Map>) -> Result<(),String> {
         let vp = canvas.viewport();
         canvas.set_viewport(self.display);
         canvas.set_draw_color(Color::GRAY);

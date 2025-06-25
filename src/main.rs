@@ -4,12 +4,13 @@ mod frames;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use multiplayer_fps_v3::display::{Display, Minimap};
+use multiplayer_fps_v3::display::{Display, Minimap, TextureManager};
 use multiplayer_fps_v3::world::{ Map};
+use sdl2::image::LoadTexture;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::{FPoint, Point, Rect};
+use sdl2::rect::{Point, Rect};
 use sdl2::render::{Canvas};
 use sdl2::video::Window;
 use sdl2::EventPump;
@@ -17,7 +18,7 @@ use sdl2::ttf::{self, Font};
 
 use multiplayer_fps_v3::entities::{
     // Entites, 
-    self, Barrel, Entity, Player};
+    new_barrel, Entity, Kayou, Player};
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
@@ -63,39 +64,25 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let texture_creator = canvas.texture_creator();
 
+    // let mut tm: TextureManager<'a> = TextureManager::new(&texture_creator);
+    // tm.load("barrel", "assets/img/barrel.png").unwrap();
+    // tm.load("kayou", "assets/img/kayou.png").unwrap();
+
+    // Clone the Rc<Texture> so the entity owns its own reference
+    // let barrel_texture = tm.get("barrel").unwrap().clone();
+    let bat = texture_creator.load_texture("assets/img/barrel.png").unwrap();
+    let mut barrel = new_barrel(13.5, 13.0);
+    barrel.insert_texture(bat, "all");
+
     let map = Map::from_file("conf/map2.jsonc",&texture_creator).unwrap();
     let player = Rc::new(RefCell::new(Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0))));
-    entities::init_player(player.clone());
+    // entities::init_player(player.clone());
     let mut loop_ctrl = frames::FramesCtrl::init(60);
     let mut minimap = Minimap::new(map.clone(), 800/24, 800, Point::new(0, 0));
 
     let minimap_win = video_subsystem.window("minimap", 800, 800).position_centered().build().unwrap();
     let mut minimap_canvas = minimap_win.into_canvas().build().unwrap();
 
-    // let mut entites = Entites::init( map.clone(),player.clone());
-
-    let mut placeholder = texture_creator
-        .create_texture_streaming(PixelFormatEnum::RGBA8888, 64, 64)
-        .expect("Erreur lors de la création de la texture");
-
-    placeholder
-            .with_lock(None, |buffer: &mut [u8], pitch: usize| {
-            for y in 0..64 {
-                for x in 0..64 {
-                    let offset = y * pitch + x * 4;
-                    buffer[offset] = 0;       // Rouge
-                    buffer[offset + 1] = 255; // Vert
-                    buffer[offset + 2] = 0;   // Bleu
-                    buffer[offset + 3] = 255; // Alpha
-                }
-            }
-        })
-        .expect("Erreur lors du lock de la texture");
-    // let barrel = Entity::new(0, FPoint::new(13.5, 16.5), Rc::new(RefCell::new(placeholder)), player.clone());
-
-    let mut barrel = Barrel::new(13.5, 16.5, &texture_creator).unwrap();
-    
-    // entites.add(barrel.clone());
 
     loop {
         clear(&mut canvas);
@@ -116,15 +103,11 @@ pub fn main() {
             // minimap_canvas.fill_rect(Rect::from_center(Point::new((barrel.x * 800.0/24.0) as i32, (barrel.y * 800.0/24.0) as i32), 30, 30)).unwrap();
         }
         
-        minimap.display(&mut minimap_canvas).unwrap();
+        minimap.display(&mut minimap_canvas,None, None).unwrap();
         player.borrow_mut().inputs(&mut event_pump, loop_ctrl.dtime as f32);
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
-        r.display(&mut canvas).unwrap();
-
-        barrel.display(&map,&mut canvas).unwrap();
-
-        // entites.render(&mut canvas).unwrap();
-
+        r.display(&mut canvas,None,None).unwrap();
+        barrel.display( &mut canvas,Some(*player.borrow()),Some(&map)).unwrap();
         // -- end game loop --
         display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,*player.borrow()).unwrap();
 
