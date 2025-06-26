@@ -18,7 +18,7 @@ use sdl2::ttf::{self, Font};
 
 use multiplayer_fps_v3::entities::{
     // Entites, 
-    new_barrel, Entity, Kayou, Player};
+    new_barrel, Player};
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
