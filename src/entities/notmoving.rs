@@ -28,7 +28,7 @@ impl<'a> Entity<'a> for NotMoving<'a> {
         self.texture.clone()
     }
 
-    fn update(&self) -> Result<(),String> {
-        Err(format!("barrel has no update behavior (it's a barrel)"))
+    fn update(&mut self) -> Result<(),String> {
+        Ok(())
     }
 }

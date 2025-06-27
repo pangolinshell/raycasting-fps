@@ -8,7 +8,7 @@ pub trait Entity<'a> {
     fn position(&self) -> (f32,f32);
     fn direction(&self) -> f32;
     fn texture(&self) -> Rc<Texture<'a>>;
-    fn update(&self) -> Result<(),String>;
+    fn update(&mut self) -> Result<(),String>;
     fn into_render(&self, camera: Player, map: &Map<'a>) -> RenderData<'a> {
         RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture())
     }

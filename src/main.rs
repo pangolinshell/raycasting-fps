@@ -10,13 +10,13 @@ use sdl2::image::LoadTexture;
 use sdl2::pixels::{Color};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::{Point, Rect};
+use sdl2::rect::{FPoint, Point, Rect};
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{NotMoving, Player};
+use multiplayer_fps_v3::entities::{NotMoving, Player, Straffer};
 use multiplayer_fps_v3::entities::Entity;
 
 const WIN_RES: (u32,u32) = (1280, 1024);
@@ -69,9 +69,17 @@ pub fn main() {
     let barrel_a = NotMoving::new(16.0, 16.0, barrel_texture);
     let barrel_texture = texture_creator.load_texture("assets/img/barrel.png").unwrap();
     let barrel_b = NotMoving::new(20.0, 16.5, barrel_texture);
+    let goblin_texture = texture_creator.load_texture("assets/img/goblin.png").unwrap();
+    let mut goblin = Straffer::new(16.0, 16.0, Rc::new(goblin_texture), 0.05);
+    goblin.path_from(vec![
+        FPoint::from((16.0,16.0)),
+        FPoint::from((20.0,20.0)),
+        FPoint::from((0.0,0.0))
+    ]);
 
     entities.push(Box::new(barrel_a));
     entities.push(Box::new(barrel_b));
+    entities.push(Box::new(goblin));
 
 
 
@@ -110,9 +118,11 @@ pub fn main() {
         r.display(&mut canvas,None,None).unwrap();
         let mut render_datas = Vec::new();
 
-        for e in &entities {
+        for e in &mut entities {
+            e.as_mut().update().unwrap();
             render_datas.push(e.as_ref().into_render(*player.borrow(), &map));
         }
+
         render_datas.sort();
         for data in render_datas.iter_mut().rev() {
             data.display(&mut canvas).unwrap();

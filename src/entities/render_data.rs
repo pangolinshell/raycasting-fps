@@ -1,7 +1,8 @@
 use std::rc::Rc;
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
-use crate::{entities::Player, utils::vecs::from_direction, world::Map};
+use crate::{entities::Player, utils::vecs::*, world::Map};
 use std::cmp::Ordering;
+
 
 pub struct RenderData<'a> {
     camera: Player,
@@ -207,10 +208,4 @@ impl<'a> Ord for  RenderData<'a> {
         }
             
     }
-}
-
-fn delta(a: (f32, f32), b: (f32, f32)) -> f32 {
-    let dx = b.0 - a.0;
-    let dy = b.1 - a.1;
-    (dx * dx + dy * dy).sqrt()
 }

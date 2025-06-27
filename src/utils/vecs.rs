@@ -1,3 +1,5 @@
+use sdl2::rect::FPoint;
+
 #[allow(unused)]
 /// Converts an angle in radians to a 2D unit vector (x, y).
 ///
@@ -18,4 +20,31 @@
 /// ```
 pub fn from_direction(angle: f32) -> (f32,f32) {
     (angle.cos(),angle.sin())
+}
+
+pub fn direct_to(from: FPoint, to: FPoint) -> f32 {
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    dy.atan2(dx)
+}
+
+pub fn delta(a: (f32, f32), b: (f32, f32)) -> f32 {
+    let dx = b.0 - a.0;
+    let dy = b.1 - a.1;
+    (dx * dx + dy * dy).sqrt()
+}
+
+pub fn go_toward(from: FPoint, to: FPoint, distance: f32) -> FPoint {
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    let length = (dx * dx + dy * dy).sqrt();
+
+    if length == 0.0 {
+        return from; // Pas de direction, on reste au même point
+    }
+
+    let unit_x = dx / length;
+    let unit_y = dy / length;
+
+    FPoint::new(from.x + unit_x * distance, from.y + unit_y * distance)
 }
