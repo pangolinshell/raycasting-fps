@@ -1,3 +1,4 @@
+#![allow(unused)]
 use sdl2::rect::FPoint;
 
 #[allow(unused)]
