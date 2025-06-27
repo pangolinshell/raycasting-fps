@@ -4,10 +4,10 @@ mod frames;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use multiplayer_fps_v3::display::{Display, Minimap, TextureManager};
+use multiplayer_fps_v3::display::{Display, Minimap};
 use multiplayer_fps_v3::world::{ Map};
 use sdl2::image::LoadTexture;
-use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::pixels::{Color};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::rect::{Point, Rect};
@@ -16,9 +16,8 @@ use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{
-    // Entites, 
-    new_barrel, Player};
+use multiplayer_fps_v3::entities::{NotMoving, Player, RenderData};
+use multiplayer_fps_v3::entities::Entity;
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
@@ -64,15 +63,8 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let texture_creator = canvas.texture_creator();
 
-    // let mut tm: TextureManager<'a> = TextureManager::new(&texture_creator);
-    // tm.load("barrel", "assets/img/barrel.png").unwrap();
-    // tm.load("kayou", "assets/img/kayou.png").unwrap();
-
-    // Clone the Rc<Texture> so the entity owns its own reference
-    // let barrel_texture = tm.get("barrel").unwrap().clone();
-    let bat = texture_creator.load_texture("assets/img/barrel.png").unwrap();
-    let mut barrel = new_barrel(13.5, 13.0);
-    barrel.insert_texture(bat, "all");
+    let barrel_texture = texture_creator.load_texture("assets/img/barrel.png").unwrap();
+    let barrel = NotMoving::new(16.0, 16.0, barrel_texture);
 
     let map = Map::from_file("conf/map2.jsonc",&texture_creator).unwrap();
     let player = Rc::new(RefCell::new(Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0))));
@@ -105,9 +97,10 @@ pub fn main() {
         
         minimap.display(&mut minimap_canvas,None, None).unwrap();
         player.borrow_mut().inputs(&mut event_pump, loop_ctrl.dtime as f32);
+
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas,None,None).unwrap();
-        barrel.display( &mut canvas,Some(*player.borrow()),Some(&map)).unwrap();
+        barrel.into_render(*player.borrow(), &map).display(&mut canvas).unwrap();
         // -- end game loop --
         display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,*player.borrow()).unwrap();
 

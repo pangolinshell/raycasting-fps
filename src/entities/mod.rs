@@ -1,9 +1,9 @@
 mod player;
-mod barrel;
-mod entities;
 mod entity;
+mod render_data;
+mod notmoving;
 
-
+pub use entity::Entity;
+pub use render_data::RenderData;
 pub use player::Player;
-// pub use barrel::Barrel;
-pub use barrel::new_barrel;
+pub use notmoving::NotMoving;
