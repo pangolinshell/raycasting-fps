@@ -16,7 +16,7 @@ use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{NotMoving, Player, RenderData};
+use multiplayer_fps_v3::entities::{NotMoving, Player};
 use multiplayer_fps_v3::entities::Entity;
 
 const WIN_RES: (u32,u32) = (1280, 1024);
@@ -64,7 +64,12 @@ pub fn main() {
     let texture_creator = canvas.texture_creator();
 
     let barrel_texture = texture_creator.load_texture("assets/img/barrel.png").unwrap();
-    let barrel = NotMoving::new(16.0, 16.0, barrel_texture);
+    let barrel_a = NotMoving::new(16.0, 16.0, barrel_texture);
+    let barrel_texture = texture_creator.load_texture("assets/img/barrel.png").unwrap();
+
+    let barrel_b = NotMoving::new(20.0, 16.5, barrel_texture);
+
+
 
     let map = Map::from_file("conf/map2.jsonc",&texture_creator).unwrap();
     let player = Rc::new(RefCell::new(Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0))));
@@ -100,7 +105,14 @@ pub fn main() {
 
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas,None,None).unwrap();
-        barrel.into_render(*player.borrow(), &map).display(&mut canvas).unwrap();
+        let mut render_datas = Vec::new();
+        render_datas.push(barrel_a.into_render(*player.borrow(), &map));
+        render_datas.push(barrel_b.into_render(*player.borrow(), &map));
+
+        render_datas.sort();
+        for data in render_datas.iter_mut().rev() {
+            data.display(&mut canvas).unwrap();
+        }
         // -- end game loop --
         display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,*player.borrow()).unwrap();
 
