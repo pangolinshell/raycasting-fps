@@ -27,6 +27,10 @@ impl<'a> Entity<'a> for Straffer<'a> {
         self.position
     }
 
+    fn entity_type(&self) -> super::entity::EntityType {
+        super::entity::EntityType::Living
+    }
+
     fn direction(&self) -> f32 {
         self.direction
     }
@@ -35,7 +39,7 @@ impl<'a> Entity<'a> for Straffer<'a> {
         self.texture.clone()
     }
 
-    fn update(&mut self,ctx: Option<Context<'a>>) -> Result<(),String> {
+    fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String> {
         if delta(self.position, (self.way[self.target].x,self.way[self.target].y)) <= self.speed {
             self.target = if self.target == self.way.len() - 1 {0} else {self.target + 1};
         }

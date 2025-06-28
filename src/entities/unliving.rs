@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use sdl2::render::Texture;
 
-use crate::entities::Entity;
+use crate::entities::*;
 
 pub struct NotMoving<'a> {
     position: (f32,f32),
@@ -24,11 +24,15 @@ impl<'a> Entity<'a> for NotMoving<'a> {
         0.0
     }
 
+    fn entity_type(&self) -> entity::EntityType {
+        entity::EntityType::UnLiving
+    }
+
     fn texture(&self) -> Rc<sdl2::render::Texture<'a>> {
         self.texture.clone()
     }
 
-    fn update(&mut self,ctx: Option<super::entity::Context<'a>>) -> Result<(),String> {
+    fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String> {
         Ok(())
     }
 }

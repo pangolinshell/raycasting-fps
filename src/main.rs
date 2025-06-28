@@ -16,7 +16,7 @@ use sdl2::video::{Window};
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{NotMoving, Player, Straffer};
+use multiplayer_fps_v3::entities::{Context, NotMoving, PlacementData, Player, RenderData, Straffer};
 use multiplayer_fps_v3::entities::Entity;
 
 const WIN_RES: (u32,u32) = (1280, 1024);
@@ -108,7 +108,6 @@ pub fn main() {
             minimap_canvas.set_draw_color(Color::YELLOW);
             minimap_canvas.fill_rect(rect).unwrap();
             minimap_canvas.set_draw_color(Color::GREEN);
-            // minimap_canvas.fill_rect(Rect::from_center(Point::new((barrel.x * 800.0/24.0) as i32, (barrel.y * 800.0/24.0) as i32), 30, 30)).unwrap();
         }
         
         minimap.display(&mut minimap_canvas,None, None).unwrap();
@@ -116,15 +115,33 @@ pub fn main() {
 
         let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas,None,None).unwrap();
-        let mut render_datas = Vec::new();
+        let mut render_datas: Vec<RenderData> = Vec::new();
 
-        for e in &mut entities {
-            e.as_mut().update(None).unwrap();
-            render_datas.push(e.as_ref().into_render(*player.borrow(), &map));
+        for i in 0..entities.len() {
+            let (before, after) = entities.split_at_mut(i);
+            let (current, after) = after.split_at_mut(1);
+            let e_mut = &mut current[0];
+        
+            let p_datas: Vec<PlacementData> = before
+                .iter()
+                .chain(after.iter())
+                .map(|e| e.into_placement_data())
+                .collect();
+        
+            let mut ctx = Context {
+                map: map.clone(),
+                player: *player.borrow(),
+                others: p_datas,
+            };
+        
+            e_mut.update(Some(&mut ctx)).unwrap();
+            render_datas.push(e_mut.into_render(*player.borrow(), &map));
         }
 
+        
         render_datas.sort();
         for data in render_datas.iter_mut().rev() {
+            
             data.display(&mut canvas).unwrap();
         }
         // -- end game loop --
