@@ -32,6 +32,7 @@ impl<'a> Entity<'a> for NotMoving<'a> {
         self.texture.clone()
     }
 
+    #[allow(unused_variables)]
     fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String> {
         Ok(())
     }
