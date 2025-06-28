@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::rc::Rc;
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
 use crate::{entities::Player, utils::vecs::*, world::Map};
@@ -8,7 +10,7 @@ pub struct RenderData<'a> {
     camera: Player,
     map: Map<'a>,
     position: (f32,f32),
-    direction: f32,
+    _direction: f32,
     texture: Rc<Texture<'a>>
 }
 
@@ -18,7 +20,7 @@ impl<'a> RenderData<'a> {
             camera,
             map: map.clone(),
             position: (position.x,position.y),
-            direction,
+            _direction: direction,
             texture
         }
     }
