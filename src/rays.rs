@@ -46,6 +46,7 @@ impl<'a> Rays<'a> {
 }
 
 impl<'a> display::Display<'a> for Rays<'a>{
+    #[allow(unused)]
     fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,from: Option<Player>,map: Option<&Map>) -> Result<(),String> {
         let v_rect = canvas.viewport();
         let (_,h) = (v_rect.width(),v_rect.height());
