@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use sdl2::{rect::FPoint, render::Texture};
-use crate::{entities::Entity, utils::vecs::*};
+use crate::{entities::{entity::Context, Entity}, utils::vecs::*};
 
 pub struct Straffer<'a> {
     position: (f32,f32),
@@ -35,7 +35,7 @@ impl<'a> Entity<'a> for Straffer<'a> {
         self.texture.clone()
     }
 
-    fn update(&mut self) -> Result<(),String> {
+    fn update(&mut self,ctx: Option<Context<'a>>) -> Result<(),String> {
         if delta(self.position, (self.way[self.target].x,self.way[self.target].y)) <= self.speed {
             self.target = if self.target == self.way.len() - 1 {0} else {self.target + 1};
         }

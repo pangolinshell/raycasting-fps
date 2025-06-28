@@ -119,7 +119,7 @@ pub fn main() {
         let mut render_datas = Vec::new();
 
         for e in &mut entities {
-            e.as_mut().update().unwrap();
+            e.as_mut().update(None).unwrap();
             render_datas.push(e.as_ref().into_render(*player.borrow(), &map));
         }
 

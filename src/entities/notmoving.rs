@@ -28,7 +28,7 @@ impl<'a> Entity<'a> for NotMoving<'a> {
         self.texture.clone()
     }
 
-    fn update(&mut self) -> Result<(),String> {
+    fn update(&mut self,ctx: Option<super::entity::Context<'a>>) -> Result<(),String> {
         Ok(())
     }
 }
