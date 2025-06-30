@@ -1,6 +1,6 @@
 use std::{cell::RefCell,rc::Rc};
 use sdl2::{rect::Rect, render::Texture};
-use crate::{display, entities::Player, world::Map};
+use crate::{display, player::Player, world::Map};
 
 #[derive(Clone)]
 pub struct Ray<'a> {
