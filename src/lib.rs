@@ -5,3 +5,4 @@ mod error;
 
 mod rays;
 mod utils;
+mod player;

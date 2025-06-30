@@ -86,7 +86,7 @@ pub fn main() {
     let map = Map::from_file("conf/map2.jsonc",&texture_creator).unwrap();
     let player = Rc::new(RefCell::new(Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0))));
     // entities::init_player(player.clone());
-    let mut loop_ctrl = frames::FramesCtrl::init(60);
+    let mut loop_ctrl = frames::FramesCtrl::init(120);
     let mut minimap = Minimap::new(map.clone(), 800/24, 800, Point::new(0, 0));
 
     let minimap_win = video_subsystem.window("minimap", 800, 800).position_centered().build().unwrap();

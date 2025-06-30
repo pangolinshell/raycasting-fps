@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use sdl2::{rect::FPoint, render::Texture};
 
-use crate::{entities::{render_data::RenderData, Player}, world::Map};
+use crate::{entities::{render_data::RenderData}, world::Map,player::Player};
 
 
 pub trait Entity<'a> {

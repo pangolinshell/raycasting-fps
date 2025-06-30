@@ -1,10 +1,10 @@
-#![allow(unused)]
+#![allow(unused,)]
 
 use std::rc::Rc;
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
-use crate::{entities::Player, utils::vecs::*, world::Map};
+use crate::{utils::vecs::*, world::Map};
 use std::cmp::Ordering;
-
+use crate::player::Player;
 
 pub struct RenderData<'a> {
     camera: Player,
