@@ -1,5 +1,8 @@
-use crate::{ rays::{Ray, Rays}, utils, world::Map};
+
+
 use sdl2::{keyboard::Scancode};
+
+use crate::{rays::{Ray, Rays}, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
 
 #[derive(Debug,Clone, Copy)]
 pub struct Player {
@@ -16,7 +19,7 @@ impl Player {
     pub fn cast_rays<'a>(&self, map: Map<'a>, w: u32) -> Rays<'a> {
         let mut rays: Vec<Ray> = Vec::new();
         let (pos_x,pos_y) = self.position;
-        let (dir_x,dir_y) = utils::vecs::from_direction(self.direction);
+        let (dir_x,dir_y) = from_direction(self.direction);
         // let (plane_x,plane_y) =(0.0f32,0.66f32);
         let fov_factor = 0.5; // tu peux jouer avec ça 0.66 de (0.5 à 1.0 typiquement)
         let plane_x = -dir_y * fov_factor;
@@ -143,10 +146,10 @@ impl Player {
         }
 
         if keystate.is_scancode_pressed(Scancode::E) {
-            self.direction += utils::angles::degrees_to_rad(1.0);
+            self.direction += degrees_to_rad(1.0);
         }
         if keystate.is_scancode_pressed(Scancode::Q) {
-            self.direction -= utils::angles::degrees_to_rad(1.0);
+            self.direction -= degrees_to_rad(1.0);
         }
 
         self.position.0 = new_x;

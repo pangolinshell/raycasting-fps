@@ -1,11 +1,6 @@
 extern crate sdl2;
-mod utils;
-mod frames;
-use std::cell::RefCell;
 use std::rc::Rc;
 
-use multiplayer_fps_v3::display::{Display, Minimap};
-use multiplayer_fps_v3::world::{ Map};
 use sdl2::image::LoadTexture;
 use sdl2::pixels::{Color};
 use sdl2::event::Event;
@@ -16,8 +11,11 @@ use sdl2::video::{Window};
 use sdl2::EventPump;
 use sdl2::ttf::{self, Font};
 
-use multiplayer_fps_v3::entities::{Context, NotMoving, PlacementData, Player, RenderData, Straffer};
-use multiplayer_fps_v3::entities::Entity;
+use multiplayer_fps_v3::display::{Display, Minimap};
+use multiplayer_fps_v3::world::{ Map};
+use multiplayer_fps_v3::{utils,frames};
+use multiplayer_fps_v3::entities::{Context, NotMoving, PlacementData, RenderData, Straffer,Entity,};
+use multiplayer_fps_v3::player::Player;
 
 const WIN_RES: (u32,u32) = (1280, 1024);
 
@@ -84,7 +82,7 @@ pub fn main() {
 
 
     let map = Map::from_file("conf/map2.jsonc",&texture_creator).unwrap();
-    let player = Rc::new(RefCell::new(Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0))));
+    let mut player = Player::new(22.0, 12.0, utils::angles::degrees_to_rad(180.0));
     // entities::init_player(player.clone());
     let mut loop_ctrl = frames::FramesCtrl::init(120);
     let mut minimap = Minimap::new(map.clone(), 800/24, 800, Point::new(0, 0));
@@ -103,7 +101,7 @@ pub fn main() {
 
         // -- start game loop --
         {
-            let ppos = player.borrow().position;
+            let ppos = player.position;
             let rect = Rect::from_center(Point::new((ppos.0 * 800.0/24.0) as i32,(ppos.1 * 800.0/24.0) as i32), 800/26,800/26);
             minimap_canvas.set_draw_color(Color::YELLOW);
             minimap_canvas.fill_rect(rect).unwrap();
@@ -111,9 +109,9 @@ pub fn main() {
         }
         
         minimap.display(&mut minimap_canvas,None, None).unwrap();
-        player.borrow_mut().inputs(&mut event_pump, loop_ctrl.dtime as f32);
+        player.inputs(&mut event_pump, loop_ctrl.dtime as f32);
 
-        let mut r = player.borrow_mut().cast_rays(map.clone(), WIN_RES.0);
+        let mut r = player.cast_rays(map.clone(), WIN_RES.0);
         r.display(&mut canvas,None,None).unwrap();
         let mut render_datas: Vec<RenderData> = Vec::new();
 
@@ -130,12 +128,12 @@ pub fn main() {
         
             let mut ctx = Context {
                 map: map.clone(),
-                player: *player.borrow(),
+                player: player,
                 others: p_datas,
             };
         
             e_mut.update(Some(&mut ctx)).unwrap();
-            render_datas.push(e_mut.into_render(*player.borrow(), &map));
+            render_datas.push(e_mut.into_render(player, &map));
         }
 
         
@@ -145,7 +143,7 @@ pub fn main() {
             data.display(&mut canvas).unwrap();
         }
         // -- end game loop --
-        display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,*player.borrow()).unwrap();
+        display_fps(Point::new(0, 0), &font, loop_ctrl.fps(), &mut canvas,player).unwrap();
 
         minimap_canvas.present();
         canvas.present();

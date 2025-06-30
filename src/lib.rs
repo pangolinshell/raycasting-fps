@@ -4,5 +4,6 @@ pub mod display;
 mod error;
 
 mod rays;
-mod utils;
-mod player;
+pub mod frames;
+pub mod utils;
+pub mod player;
