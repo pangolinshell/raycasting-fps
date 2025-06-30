@@ -1,4 +1,4 @@
-use crate::{entities::Player, world::{Map, TileType}};
+use crate::{player::Player, world::{Map, TileType}};
 use std::rc::Rc;
 use sdl2::{pixels::Color, rect::{Point, Rect}};
 
