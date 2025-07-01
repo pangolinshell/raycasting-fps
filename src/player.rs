@@ -146,10 +146,10 @@ impl Player {
         }
 
         if keystate.is_scancode_pressed(Scancode::E) {
-            self.direction += degrees_to_rad(1.0);
+            self.direction += degrees_to_rad(1.0) * speed * 20.0;
         }
         if keystate.is_scancode_pressed(Scancode::Q) {
-            self.direction -= degrees_to_rad(1.0);
+            self.direction -= degrees_to_rad(1.0) * speed * 20.0;
         }
 
         self.position.0 = new_x;
