@@ -1,4 +1,5 @@
 extern crate sdl2;
+mod server;
 use std::rc::Rc;
 
 use sdl2::image::LoadTexture;
@@ -67,8 +68,8 @@ pub fn main() {
     let barrel_a = NotMoving::new(16.0, 16.0, barrel_texture);
     let barrel_texture = texture_creator.load_texture("assets/img/barrel.png").unwrap();
     let barrel_b = NotMoving::new(20.0, 16.5, barrel_texture);
-    let goblin_texture = texture_creator.load_texture("assets/img/goblin.png").unwrap();
-    let mut goblin = Straffer::new(16.0, 16.0, Rc::new(goblin_texture), 0.05);
+    let goblin_texture = texture_creator.load_texture("assets/img/guard.png").unwrap();
+    let mut goblin = Straffer::new(16.0, 16.0, Rc::new(goblin_texture), 0.01);
     goblin.path_from(vec![
         FPoint::from((16.0,16.0)),
         FPoint::from((20.0,20.0)),
