@@ -31,6 +31,7 @@ impl Instance {
                 let mut buf = [0;1024];
                 let opts = match sock.recv_from(&mut buf) {
                     Ok(v) => Some(v),
+                    // ! IMPORTANT NON BLOQUANT
                     Err(e) => {
                         if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {
                             eprintln!("{}",e);
