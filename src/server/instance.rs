@@ -1,11 +1,12 @@
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
-use crate::server::data::{self, Entity, OnConnection};
+use crate::server::data::{Deny, Entity, OnConnection};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
 type Error = Box<dyn std::error::Error>;
 
+#[derive(Clone)]
 pub struct Instance {
     port: u32,
     frequency: u32,
@@ -20,12 +21,12 @@ impl Instance {
     pub fn set_max_hosts(&mut self, value: u8) {
         self.max_hosts = value;
     }
-
     pub fn run(&self) -> std::io::Result<()> {
         let socket = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(127, 0, 0, 1),self.port))?;
         socket.set_nonblocking(true)?;
+        let instance = self.clone();
         thread::spawn(move || {
-            match running(socket) {
+            match running(socket, &instance) {
                 Ok(_) => println!("server stopped succesfully"),
                 Err(e) => println!("SERVER ERROR : {}",e.as_ref())
             };
@@ -34,7 +35,7 @@ impl Instance {
     }
 }
 
-pub fn running(socket: UdpSocket) -> Result<(),Error>  {
+pub fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
     let mut hosts: Vec<Entity> = Vec::new();
     loop {
             let mut buf = [0;1024];
@@ -49,8 +50,15 @@ pub fn running(socket: UdpSocket) -> Result<(),Error>  {
             match opts {
                 Some((size,addr)) => {
                     let data = String::from_utf8(buf[..size].to_vec())?;
+                    //* MAX PLAYER CASE
+                    if hosts.len() == instance.max_hosts as usize { 
+                        let data = Deny {reason: format!("max number of players has been reached ({})",instance.max_hosts)};
+                        socket.send_to(data.to_string()?.as_bytes(), addr)?;
+                        continue;
+                    }
+                    //* FIRST CONNECTION
                     if !hosts.iter().any(|v | v.addr == addr.to_string()) {
-                        handshake(data, addr, &mut hosts, &socket)?                    
+                        handshake(data, addr, &mut hosts, &socket)?;                 
                     }
                 }
                 None => {},
