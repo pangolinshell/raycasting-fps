@@ -1,8 +1,10 @@
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
-use crate::server::data::{Entity, OnConnection};
+use crate::server::data::{self, Entity, OnConnection};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
+
+type Error = Box<dyn std::error::Error>;
 
 pub struct Instance {
     port: u32,
@@ -32,7 +34,7 @@ impl Instance {
     }
 }
 
-pub fn running(socket: UdpSocket) -> Result<(),Box<dyn std::error::Error>>  {
+pub fn running(socket: UdpSocket) -> Result<(),Error>  {
     let mut hosts: Vec<Entity> = Vec::new();
     loop {
             let mut buf = [0;1024];
@@ -40,29 +42,31 @@ pub fn running(socket: UdpSocket) -> Result<(),Box<dyn std::error::Error>>  {
                 Ok(v) => Some(v),
                 // ! IMPORTANT NON BLOQUANT
                 Err(e) => {
-                    if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {
-                        eprintln!("{}",e);
-                    }
+                    if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {return Err(Box::new(e));}
                     None
                 }
             };
             match opts {
                 Some((size,addr)) => {
+                    let data = String::from_utf8(buf[..size].to_vec())?;
                     if !hosts.iter().any(|v | v.addr == addr.to_string()) {
-                        println!("new connection {}",addr);
-                        let data = String::from_utf8(buf[..size].to_vec())?;
-                        println!("data : {}",data);
-                        let v = OnConnection::from_string(data)?;
-                        let e = Entity::new(addr, v.nickname, (16.0,16.0,0.0));
-                        hosts.push(e.clone());
-                        let data = e.to_string()?;
-                        let addrs = hosts.iter().map(|v| v.clone().addr).collect::<Vec<String>>();
-                        let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
+                        handshake(data, addr, &mut hosts, &socket)?                    
                     }
                 }
                 None => {},
             }
+            dbg!(&hosts);
         }
+}
+
+pub fn handshake(data: String,addr: SocketAddr, hosts: &mut Vec<Entity>,socket: &UdpSocket) -> Result<(),Error>{
+    let v = OnConnection::from_string(data)?;
+    let e = Entity::new(addr, v.nickname, (16.0,16.0,0.0));
+    hosts.push(e.clone());
+    let data = e.to_string()?;
+    let addrs = hosts.iter().map(|v| v.clone().addr).collect::<Vec<String>>();
+    let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
+    Ok(())
 }
 
 pub fn broadcast(socket: UdpSocket,from: Option<SocketAddr>,hosts: Vec<String>,data: String) -> std::io::Result<()> {
