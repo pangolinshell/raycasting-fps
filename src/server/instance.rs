@@ -1,15 +1,12 @@
-use std::collections::HashMap;
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
-use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
+use crate::server::data::{Entity, OnConnection};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
 pub struct Instance {
     port: u32,
     frequency: u32,
-
     max_hosts: u8, // default 4,
 }
 
@@ -23,31 +20,58 @@ impl Instance {
     }
 
     pub fn run(&self) -> std::io::Result<()> {
-        let sock = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(127, 0, 0, 1),self.port))?;
-        sock.set_nonblocking(true)?;
-        let mut hosts: Vec<SocketAddr> = Vec::new();
+        let socket = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(127, 0, 0, 1),self.port))?;
+        socket.set_nonblocking(true)?;
         thread::spawn(move || {
-            loop {
-                let mut buf = [0;1024];
-                let opts = match sock.recv_from(&mut buf) {
-                    Ok(v) => Some(v),
-                    // ! IMPORTANT NON BLOQUANT
-                    Err(e) => {
-                        if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {
-                            eprintln!("{}",e);
-                        }
-                        None
-                    }
-                };
-                match opts {
-                    Some((size,addr)) => {
-                        if !hosts.contains(&addr) {
-                        }
-                    }
-                    None => {},
-                }
-            }
+            match running(socket) {
+                Ok(_) => println!("server stopped succesfully"),
+                Err(e) => println!("SERVER ERROR : {}",e.as_ref())
+            };
         });
         Ok(())
     }
+}
+
+pub fn running(socket: UdpSocket) -> Result<(),Box<dyn std::error::Error>>  {
+    let mut hosts: Vec<Entity> = Vec::new();
+    loop {
+            let mut buf = [0;1024];
+            let opts = match socket.recv_from(&mut buf) {
+                Ok(v) => Some(v),
+                // ! IMPORTANT NON BLOQUANT
+                Err(e) => {
+                    if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {
+                        eprintln!("{}",e);
+                    }
+                    None
+                }
+            };
+            match opts {
+                Some((size,addr)) => {
+                    if !hosts.iter().any(|v | v.addr == addr.to_string()) {
+                        println!("new connection {}",addr);
+                        let data = String::from_utf8(buf[..size].to_vec())?;
+                        println!("data : {}",data);
+                        let v = OnConnection::from_string(data)?;
+                        let e = Entity::new(addr, v.nickname, (16.0,16.0,0.0));
+                        hosts.push(e.clone());
+                        let data = e.to_string()?;
+                        let addrs = hosts.iter().map(|v| v.clone().addr).collect::<Vec<String>>();
+                        let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
+                    }
+                }
+                None => {},
+            }
+        }
+}
+
+pub fn broadcast(socket: UdpSocket,from: Option<SocketAddr>,hosts: Vec<String>,data: String) -> std::io::Result<()> {
+    for addr in hosts {
+        match from {
+            Some(v) => if v.to_string() == addr {continue;},
+            None => {},
+        }
+        socket.send_to(data.as_bytes(), addr)?;
+    }
+    Ok(())
 }
