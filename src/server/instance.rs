@@ -59,6 +59,9 @@ pub fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
                     //* FIRST CONNECTION
                     if !hosts.iter().any(|v | v.addr == addr.to_string()) {
                         handshake(data, addr, &mut hosts, &socket)?;                 
+                    } 
+                    else {
+
                     }
                 }
                 None => {},
