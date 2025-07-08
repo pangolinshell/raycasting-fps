@@ -1,0 +1,14 @@
+/home/student/Bureau/RUST/raycasting-fps/target/debug/deps/libsdl2_sys-4a0844a75c47d342.rmeta: /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/lib.rs /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/image.rs /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/ttf.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_bindings.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_image_bindings.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_ttf_bindings.rs
+
+/home/student/Bureau/RUST/raycasting-fps/target/debug/deps/libsdl2_sys-4a0844a75c47d342.rlib: /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/lib.rs /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/image.rs /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/ttf.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_bindings.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_image_bindings.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_ttf_bindings.rs
+
+/home/student/Bureau/RUST/raycasting-fps/target/debug/deps/sdl2_sys-4a0844a75c47d342.d: /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/lib.rs /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/image.rs /home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/ttf.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_bindings.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_image_bindings.rs /home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_ttf_bindings.rs
+
+/home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/lib.rs:
+/home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/image.rs:
+/home/student/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.37.0/src/ttf.rs:
+/home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_bindings.rs:
+/home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_image_bindings.rs:
+/home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out/sdl_ttf_bindings.rs:
+
+# env-dep:OUT_DIR=/home/student/Bureau/RUST/raycasting-fps/target/debug/build/sdl2-sys-e0ea3d0ac473fe4b/out
