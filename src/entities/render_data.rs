@@ -6,6 +6,28 @@ use crate::{utils::vecs::*, world::Map};
 use std::cmp::Ordering;
 use crate::player::Player;
 
+/// `RenderData` is a structure that encapsulates all the necessary data required to render an entity (such as a sprite)
+/// in a 3D environment using raycasting techniques. It holds references to the camera (player), the game map, the entity's
+/// position and direction, and the texture to be rendered.
+///
+/// # Fields
+/// - `camera`: The player struct representing the camera's position, direction, and field of view.
+/// - `map`: The game map, used for visibility and wall detection.
+/// - `position`: The (x, y) coordinates of the entity to render.
+/// - `_direction`: The facing direction of the entity (currently unused).
+/// - `texture`: The texture to use for rendering the entity.
+///
+/// # Methods
+/// - `new`: Constructs a new `RenderData` instance.
+/// - `display`: Renders the entity on the provided SDL2 canvas if it is visible to the camera.
+/// - `distance_to_player`: Computes the Euclidean distance from the entity to the player.
+/// - `is_visible`: Determines if the entity is visible to the player (in FOV and not behind a wall).
+/// - `is_in_fov`: Checks if the entity is within the camera's field of view.
+/// - `is_behind_a_wall`: Uses DDA raycasting to check if there is a wall between the player and the entity.
+///
+/// # Trait Implementations
+/// Implements `PartialEq`, `PartialOrd`, `Eq`, and `Ord` to allow sorting and comparison of entities
+/// based on their distance to the camera, which is useful for correct rendering order (e.g., painter's algorithm).
 pub struct RenderData<'a> {
     camera: Player,
     map: Map<'a>,

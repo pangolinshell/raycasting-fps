@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 mod on_connection;
 mod entity;
 

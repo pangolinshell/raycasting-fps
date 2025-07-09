@@ -4,6 +4,7 @@ use sdl2::render::Texture;
 
 use crate::entities::*;
 
+/// static entities like pillars or barrels
 pub struct NotMoving<'a> {
     position: (f32,f32),
     texture: Rc<Texture<'a>>,
