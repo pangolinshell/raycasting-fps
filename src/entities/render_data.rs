@@ -6,72 +6,82 @@ use crate::{utils::vecs::*, world::Map};
 use std::cmp::Ordering;
 use crate::player::Player;
 
-/// `RenderData` is a structure that encapsulates all the necessary data required to render an entity (such as a sprite)
-/// in a 3D environment using raycasting techniques. It holds references to the camera (player), the game map, the entity's
-/// position and direction, and the texture to be rendered.
+/// `RenderData` encapsulates all data required to render an entity (e.g., sprite)
+/// in a pseudo-3D environment using raycasting techniques.
 ///
 /// # Fields
-/// - `camera`: The player struct representing the camera's position, direction, and field of view.
-/// - `map`: The game map, used for visibility and wall detection.
-/// - `position`: The (x, y) coordinates of the entity to render.
-/// - `_direction`: The facing direction of the entity (currently unused).
-/// - `texture`: The texture to use for rendering the entity.
+/// - `camera`: The player struct representing the viewpoint (position, direction, FOV).
+/// - `map`: The game map, used to determine visibility and wall collisions.
+/// - `position`: The (x, y) coordinates of the entity.
+/// - `_direction`: Direction the entity is facing (currently unused).
+/// - `texture`: The texture used to render the entity.
 ///
 /// # Methods
-/// - `new`: Constructs a new `RenderData` instance.
-/// - `display`: Renders the entity on the provided SDL2 canvas if it is visible to the camera.
-/// - `distance_to_player`: Computes the Euclidean distance from the entity to the player.
-/// - `is_visible`: Determines if the entity is visible to the player (in FOV and not behind a wall).
-/// - `is_in_fov`: Checks if the entity is within the camera's field of view.
-/// - `is_behind_a_wall`: Uses DDA raycasting to check if there is a wall between the player and the entity.
+/// - `new`: Constructs a new `RenderData`.
+/// - `display`: Renders the entity on the SDL2 canvas if visible.
+/// - `distance_to_player`: Calculates Euclidean distance to the player.
+/// - `is_visible`: Checks if the entity is visible (within FOV and not obstructed).
+/// - `is_in_fov`: Checks if the entity lies within the player's field of view.
+/// - `is_behind_a_wall`: Uses DDA raycasting to check for wall obstruction.
 ///
-/// # Trait Implementations
-/// Implements `PartialEq`, `PartialOrd`, `Eq`, and `Ord` to allow sorting and comparison of entities
-/// based on their distance to the camera, which is useful for correct rendering order (e.g., painter's algorithm).
+/// # Traits
+/// Implements `PartialEq`, `PartialOrd`, `Eq`, and `Ord` to allow sorting
+/// entities by distance (useful for painter's algorithm).
 pub struct RenderData<'a> {
+    /// The player's viewpoint (position, direction, FOV)
     camera: Player,
+    /// The game map used for collision and visibility checks
     map: Map<'a>,
+    /// The entity's position in the world
     position: (f32,f32),
+    /// The direction the entity is facing (unused)
     _direction: f32,
+    /// The texture used to draw the entity
     texture: Rc<Texture<'a>>
 }
 
 impl<'a> RenderData<'a> {
-    pub fn new(camera: Player,map: Map<'a>,position: FPoint,direction: f32, texture: Rc<Texture<'a>>) -> Self {
+    /// Creates a new `RenderData` instance
+    pub fn new(camera: Player, map: Map<'a>, position: FPoint, direction: f32, texture: Rc<Texture<'a>>) -> Self {
         Self {
             camera,
             map: map.clone(),
-            position: (position.x,position.y),
+            position: (position.x, position.y),
             _direction: direction,
             texture
         }
     }
 
+    /// Renders the entity to the screen if it is visible to the player.
+    ///
+    /// Performs coordinate transformation and draws the texture
+    /// to the appropriate location and size on the SDL2 canvas.
     pub fn display(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
         if !self.is_visible(self.map.clone()) {
             return Ok(());
         }
+
         let v_rect = canvas.viewport();
         let (screen_w, screen_h) = (v_rect.width(), v_rect.height());
         let (px, py) = self.camera.position;
         let (dx, dy) = from_direction(self.camera.direction);
         let fov_factor = self.camera.fov_factor;
-        let (dir_x,dir_y) = from_direction(self.camera.direction);
 
+        let (dir_x, dir_y) = from_direction(self.camera.direction);
         let plane_x = -dir_y * fov_factor;
         let plane_y =  dir_x * fov_factor;
 
-        // Position relative à la caméra
+        // Relative position to camera
         let sprite_x = self.position.0 - px;
         let sprite_y = self.position.1 - py;
 
-        // Matrice de transformation inverse
+        // Inverse camera transformation matrix
         let inv_det = 1.0 / (plane_x * dy - dx * plane_y);
         let transform_x = inv_det * (dy * sprite_x - dx * sprite_y);
         let transform_y = inv_det * (-plane_y * sprite_x + plane_x * sprite_y);
 
         if transform_y <= 0.0 {
-            return Ok(()); // derrière la caméra
+            return Ok(()); // Behind the camera
         }
 
         let sprite_screen_x = ((screen_w as f32 / 2.0) * (1.0 + transform_x / transform_y)) as i32;
@@ -80,13 +90,12 @@ impl<'a> RenderData<'a> {
         let draw_start_y = (-sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
         let draw_end_y = (sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
 
-        let sprite_width = sprite_height; // carré pour simplifier
-        let draw_start_x = -sprite_width / 2 + sprite_screen_x; //.clamp(0, screen_w as i32 - 1);
-        let draw_end_x = sprite_width / 2 + sprite_screen_x;//.clamp(0, screen_w as i32 - 1);
+        let sprite_width = sprite_height; // Make it square
+        let draw_start_x = -sprite_width / 2 + sprite_screen_x;
+        let draw_end_x = sprite_width / 2 + sprite_screen_x;
 
         let texture = self.texture.clone();
-
-        let src_rect = Rect::new(0, 0, 64, 64); // texture carrée
+        let src_rect = Rect::new(0, 0, 64, 64); // Fixed-size square texture
 
         let dst_rect = Rect::new(
             draw_start_x,
@@ -95,46 +104,46 @@ impl<'a> RenderData<'a> {
             (draw_end_y - draw_start_y) as u32,
         );
 
-        let tex_ref = texture;
-        canvas.copy(&*tex_ref, src_rect, dst_rect)?;
+        canvas.copy(&*texture, src_rect, dst_rect)?;
         Ok(())
     }
 
-    fn distance_to_player(&self,player: &Player) -> f32 {
-        let (p_x,p_y) = player.position;
-        let (s_x,s_y) = self.position;
-
+    /// Computes Euclidean distance from the entity to the given player.
+    fn distance_to_player(&self, player: &Player) -> f32 {
+        let (p_x, p_y) = player.position;
+        let (s_x, s_y) = self.position;
         f32::sqrt((p_x - s_x).powi(2) + (p_y - s_y).powi(2))
     }
 
-    fn is_visible(&self,map: Map) -> bool {
+    /// Determines whether the entity is visible to the player.
+    fn is_visible(&self, map: Map) -> bool {
         self.is_in_fov() && !self.is_behind_a_wall(map)
     }
 
+    /// Checks if the entity is within the field of view of the camera.
     fn is_in_fov(&self) -> bool {
-        use crate::utils::vecs::from_direction;
-    
-        let camera = self.camera; // ← c'était self.player au lieu de self.pov
+        let camera = self.camera;
         let fov_factor = camera.fov_factor;
-    
+
         let dir_vec = from_direction(camera.direction);
         let dx = self.position.0 - camera.position.0;
         let dy = self.position.1 - camera.position.1;
-    
+
         let dist = (dx * dx + dy * dy).sqrt();
         if dist == 0.0 {
-            return true; // même position
+            return true; // Same position
         }
-    
+
         let to_entity = (dx / dist, dy / dist);
         let dot = dir_vec.0 * to_entity.0 + dir_vec.1 * to_entity.1;
-    
+
         let fov_rad = fov_factor * std::f32::consts::PI;
-        let half_fov_cos = (fov_rad / 2.0).cos(); // ← cosinus de l'angle demi-FOV
-    
+        let half_fov_cos = (fov_rad / 2.0).cos();
+
         dot >= half_fov_cos
     }
 
+    /// Uses DDA raycasting to check if a wall is between the player and the entity.
     fn is_behind_a_wall(&self, map: Map) -> bool {
         let (start_x, start_y) = self.camera.position;
         let (end_x, end_y) = (self.position.0, self.position.1);
@@ -144,7 +153,7 @@ impl<'a> RenderData<'a> {
 
         let ray_len = (dir_x * dir_x + dir_y * dir_y).sqrt();
         if ray_len == 0.0 {
-            return false; // même position = pas de mur entre
+            return false; // Same position
         }
 
         let raydir_x = dir_x / ray_len;
@@ -169,7 +178,6 @@ impl<'a> RenderData<'a> {
         };
 
         let max_dist = ray_len;
-
         let mut dist_traveled = 0.0;
 
         // DDA loop
@@ -185,15 +193,18 @@ impl<'a> RenderData<'a> {
             }
 
             if let Some(true) = map.is_wall(map_x, map_y) {
-                return true; // mur entre joueur et entité
+                return true; // Wall detected
             }
         }
 
-        false // pas de mur détecté entre les deux
+        false // No wall detected
     }
 }
 
-impl<'a> PartialEq for  RenderData<'a> {
+// === Trait Implementations for Sorting ===
+
+impl<'a> PartialEq for RenderData<'a> {
+    /// Compares distances to the camera for equality.
     fn eq(&self, other: &Self) -> bool {
         let delta_a = delta(self.position, self.camera.position);
         let delta_b = delta(other.position, self.camera.position);
@@ -201,35 +212,22 @@ impl<'a> PartialEq for  RenderData<'a> {
     }
 }
 
-impl<'a> PartialOrd for  RenderData<'a> {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+impl<'a> PartialOrd for RenderData<'a> {
+    /// Compares distances to the camera for ordering.
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let delta_a = delta(self.position, self.camera.position);
         let delta_b = delta(other.position, self.camera.position);
-        if delta_a < delta_b {
-            Some(Ordering::Less)
-        } else if delta_a > delta_b {
-            Some(Ordering::Greater)
-        } else if delta_a == delta_b {
-            Some(Ordering::Equal)
-        } else {
-            None
-        }
+        delta_a.partial_cmp(&delta_b)
     }
 }
 
-impl<'a> Eq for  RenderData<'a> {}
+impl<'a> Eq for RenderData<'a> {}
 
-impl<'a> Ord for  RenderData<'a> {
+impl<'a> Ord for RenderData<'a> {
+    /// Fully orders entities by distance to the camera.
     fn cmp(&self, other: &Self) -> Ordering {
         let delta_a = delta(self.position, self.camera.position);
         let delta_b = delta(other.position, self.camera.position);
-        if delta_a < delta_b {
-            Ordering::Less
-        } else if delta_a > delta_b {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        }
-            
+        delta_a.partial_cmp(&delta_b).unwrap_or(Ordering::Equal)
     }
 }
