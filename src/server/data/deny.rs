@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 
 #[derive(Serialize, Deserialize,Debug,Clone)]
+/// Used in case of access denial
 pub struct Deny {
     pub reason: String
 }
