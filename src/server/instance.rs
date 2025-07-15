@@ -82,25 +82,72 @@ fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
         }
 }
 
-/// Handle all first connection between the server and client
-fn handshake(data: String,addr: SocketAddr, hosts: &mut Vec<Host>,socket: &UdpSocket) -> Result<(),Error>{
+/// Handles a new connection ("handshake") from a client.
+///
+/// # Arguments
+/// * `data` - A `String` received from the client, expected to contain connection metadata (e.g., nickname).
+/// * `addr` - The `SocketAddr` (IP and port) of the client sending the data.
+/// * `hosts` - A mutable reference to the list of known hosts in the network.
+/// * `socket` - The `UdpSocket` used to communicate with clients.
+///
+/// # Returns
+/// * `Result<(), Error>` - Returns Ok if the handshake succeeds, or an Error if parsing or serialization fails.
+fn handshake(
+    data: String,
+    addr: SocketAddr,
+    hosts: &mut Vec<Host>,
+    socket: &UdpSocket,
+) -> Result<(), Error> {
+    // Parse the received string to extract connection info (e.g., nickname).
     let v = OnConnection::from_string(data)?;
-    let e = Entity::new(addr, v.nickname, (16.0,16.0,0.0));
+
+    // Create a new entity representing this client, with a default position.
+    let e = Entity::new(addr, v.nickname, (16.0, 16.0, 0.0));
+
+    // Create a host instance associated with this entity and address.
     let h = Host::new(e.clone(), addr);
+
+    // Add the new host to the list of connected hosts.
     hosts.push(h.clone());
+
+    // Serialize the entity to a string to send to other clients.
     let data = e.to_string()?;
+
+    // Gather addresses of all current hosts to broadcast the new connection.
     let addrs = hosts.iter().map(|host| host.clone().addr).collect::<Vec<SocketAddr>>();
+
+    // Broadcast the new entity to all other clients.
     let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
+
     Ok(())
 }
 
-fn broadcast(socket: UdpSocket,from: Option<SocketAddr>,hosts: Vec<SocketAddr>,data: String) -> std::io::Result<()> {
+/// Broadcasts a message to a list of socket addresses via UDP.
+///
+/// # Arguments
+/// * `socket` - The UDP socket to use for sending messages.
+/// * `from` - An optional address to exclude from the broadcast (e.g., the sender).
+/// * `hosts` - A list of socket addresses to which the message should be sent.
+/// * `data` - The message (as a string) to be broadcast.
+///
+/// # Returns
+/// * `std::io::Result<()>` - Returns Ok if all messages are sent successfully, or an error otherwise.
+fn broadcast(
+    socket: UdpSocket,
+    from: Option<SocketAddr>,
+    hosts: Vec<SocketAddr>,
+    data: String,
+) -> std::io::Result<()> {
     for addr in hosts {
+        // Skip sending the message back to the sender (if specified).
         match from {
-            Some(current_host) => if current_host == addr {continue;},
+            Some(current_host) => if current_host == addr { continue; },
             None => {},
         }
+
+        // Send the data to the target address.
         socket.send_to(data.as_bytes(), addr)?;
     }
+
     Ok(())
 }
