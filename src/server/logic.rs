@@ -31,7 +31,25 @@ pub fn broadcast(
     Ok(())
 }
 
-
+/// Handles a new connection attempt from a client.
+///
+/// This function performs several validation checks:
+/// - If the nickname is already used, it sends a denial message.
+/// - If the address is already used, it sends a denial message.
+/// - If the server is full (based on `max_hosts`), it sends a denial message.
+/// If all checks pass:
+/// - A new `Host` is initialized and added to the list.
+/// - A broadcast message is sent to all clients with the new host's data.
+///
+/// # Arguments
+/// * `hosts` - The current list of connected hosts (mutable reference).
+/// * `data` - The connection data received from the client.
+/// * `socket` - The UDP socket used for communication.
+/// * `max_hosts` - The maximum number of allowed hosts.
+///
+/// # Returns
+/// * `Ok(())` on success.
+/// * `Err(Box<dyn Error>)` if any error occurs during processing (e.g., serialization or socket errors).
 pub fn connection(hosts: &mut Hosts,data: Connection,socket: UdpSocket,max_hosts: u8) -> Result<(),Box<dyn Error>>{
     if hosts.get_from_nickname(&data.nickname).is_some() {
         let msg = OutputData::AccessDeny(Deny {reason: format!("the nickname \"{}\" is already used",data.nickname)});
