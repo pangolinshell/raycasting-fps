@@ -13,7 +13,7 @@ use crate::data::{Connection, Deny, Host, Hosts, OutputData};
 /// # Returns
 /// * `std::io::Result<()>` - Returns Ok if all messages are sent successfully, or an error otherwise.
 pub fn broadcast(
-    socket: UdpSocket,
+    socket: &UdpSocket,
     from: Option<SocketAddr>,
     hosts: &Hosts,
     data: String,
@@ -50,7 +50,7 @@ pub fn broadcast(
 /// # Returns
 /// * `Ok(())` on success.
 /// * `Err(Box<dyn Error>)` if any error occurs during processing (e.g., serialization or socket errors).
-pub fn connection(hosts: &mut Hosts,data: Connection,socket: UdpSocket,max_hosts: u8) -> Result<(),Box<dyn Error>>{
+pub fn connection(hosts: &mut Hosts,data: Connection,socket: &UdpSocket,max_hosts: u8) -> Result<(),Box<dyn Error>>{
     if hosts.get_from_nickname(&data.nickname).is_some() {
         let msg = OutputData::AccessDeny(Deny {reason: format!("the nickname \"{}\" is already used",data.nickname)});
         let serialized = serde_json::to_string(&msg)?;
