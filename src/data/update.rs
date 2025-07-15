@@ -19,16 +19,23 @@ pub struct Update {
     #[serde(skip, default = "default_addr")]
     pub addr: SocketAddr,
 
-    pub nickname: String,
-    pub x: f32,
-    pub y: f32,
-    pub d: f32,
-    pub status: Status,
+    // pub nickname: String,
+    pub x: Option<f32>,
+    pub y: Option<f32>,
+    pub d: Option<f32>,
+    pub status: Option<Status>,
 }
 
 impl Update {
     pub fn new(addr: SocketAddr,nickname: String,xyd: (f32,f32,f32)) -> Self {
-        Self { addr,nickname, x: xyd.0, y: xyd.1, d: xyd.2, status: Status::Alive }
+        Self { 
+            addr,
+            // nickname: nickname,
+            x: Some(xyd.0),
+            y: Some(xyd.1),
+            d: Some(xyd.2),
+            status: Some(Status::Alive)
+        }
     }
 
     pub fn from_string(data: String,addr: SocketAddr) -> Result<Self, Box<dyn std::error::Error>> {
@@ -45,7 +52,7 @@ impl Update {
         self.addr == addr
     }
 
-    pub fn is_nickname(&self,nickname: String) -> bool {
-        self.nickname == nickname
-    }
+    // pub fn is_nickname(&self,nickname: String) -> bool {
+    //     self.nickname == Some(nickname)
+    // }
 }

@@ -1,12 +1,17 @@
 #![allow(unused)]
-
-mod connection;
-mod entity;
 mod deny;
+
+mod host;
+pub use host::Host;
+
+pub use hosts::Hosts;
 mod hosts;
 
+mod connection;
 pub use connection::Connection;
-pub use entity::*;
+
+mod update;
+pub use update::*;
 
 pub use deny::Deny;
 

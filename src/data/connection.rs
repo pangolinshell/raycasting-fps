@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use serde::{Deserialize, Serialize};
-use super::entity::default_addr;
+use super::update::default_addr;
 
 #[derive(Deserialize,Serialize,Debug)]
 pub struct Connection {

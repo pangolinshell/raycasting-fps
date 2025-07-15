@@ -1,10 +1,10 @@
 use std::net::SocketAddr;
-use crate::data::Update;
+use crate::data::Host;
 use std::ops::{Deref, DerefMut};
 
 #[derive(Debug,Clone)]
 pub struct Hosts {
-    hosts: Vec<Update>
+    hosts: Vec<Host>
 }
 
 impl Hosts {
@@ -12,11 +12,11 @@ impl Hosts {
         Self { hosts: vec![] }
     }
 
-    pub fn from(v: Vec<Update>) -> Self {
+    pub fn from(v: Vec<Host>) -> Self {
         Self { hosts: v }
     }
 
-    pub fn get_from_addr(&self,addr: SocketAddr) -> Option<&Update> {
+    pub fn get_from_addr(&self,addr: SocketAddr) -> Option<&Host> {
         for host in &self.hosts {
             if host.addr == addr {
                 return Some(host);
@@ -25,7 +25,7 @@ impl Hosts {
         None
     }
 
-    pub fn get_from_nickname(&self,nickname: &str) -> Option<&Update> {
+    pub fn get_from_nickname(&self,nickname: &str) -> Option<&Host> {
         for host in &self.hosts {
             if host.nickname == nickname {
                 return Some(host);
@@ -36,7 +36,7 @@ impl Hosts {
 }
 
 impl Deref for Hosts {
-    type Target = Vec<Update>;
+    type Target = Vec<Host>;
     fn deref(&self) -> &Self::Target {
         &self.hosts
     }
