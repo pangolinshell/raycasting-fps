@@ -1,10 +1,13 @@
 use std::net::SocketAddr;
-use crate::data::{Connection, Status, Update};
+use serde::{Deserialize, Serialize};
+
+use crate::data::{Connection, Status, Update,default_addr};
 
 /// Represents a connected host with its state and identity.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone,Serialize,Deserialize)]
 pub struct Host {
     /// IP address and port of the host.
+    #[serde(skip, default = "default_addr")]
     pub addr: SocketAddr,
 
     /// Host's nickname or identifier.

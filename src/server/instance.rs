@@ -1,7 +1,7 @@
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
 
-use crate::data::{Connection, DataType, Hosts, Update};
+use crate::data::{Connection, InputData, Hosts, Update};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
@@ -51,9 +51,10 @@ impl Instance {
 fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
 let mut hosts = Hosts::new();
 loop {
-    let data = DataType::parse(&socket)?;
+    let data = InputData::parse(&socket)?;
     match data {
-        DataType::Connection(value) => {},
+        InputData::Connection(value) => {},
+        InputData::None => {},
         _ => eprintln!("not implemented yet"),
     }
 }

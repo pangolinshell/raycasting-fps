@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type",content = "data")] // <= ajoute un champ "type" dans le JSON
-pub enum DataType {
+pub enum InputData {
     Connection(Connection),
     Update(Update),
     Disconnection,
@@ -13,7 +13,7 @@ pub enum DataType {
     None,
 }
 
-impl DataType {
+impl InputData {
     pub fn parse(socket: &UdpSocket) -> Result<Self, Box<std::io::Error>> {
         // init a buffer of 1024 bytes
         let mut buf = [0; 1024];
@@ -32,16 +32,16 @@ impl DataType {
         // 
         let (size, addr) = match opts {
             Some(values) => values,
-            None => return Ok(DataType::Unknown),
+            None => return Ok(InputData::Unknown),
         };
 
         let data = String::from_utf8(buf[..size].to_vec())
             .map_err(|e| Box::new(std::io::Error::new(std::io::ErrorKind::InvalidData, e)))?;
 
-        let mut msg = serde_json::from_str::<DataType>(&data).unwrap_or(DataType::Unknown);
+        let mut msg = serde_json::from_str::<InputData>(&data).unwrap_or(InputData::Unknown);
         match &mut msg {
-            DataType::Update(value) => value.addr = addr,
-            DataType::Connection(value) => value.addr = addr,
+            InputData::Update(value) => value.addr = addr,
+            InputData::Connection(value) => value.addr = addr,
             _ => {},
         }
         Ok(msg)

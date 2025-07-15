@@ -1,11 +1,13 @@
 #![allow(unused)]
+
 mod deny;
+pub use deny::Deny;
 
 mod host;
 pub use host::Host;
 
-pub use hosts::Hosts;
 mod hosts;
+pub use hosts::Hosts;
 
 mod connection;
 pub use connection::Connection;
@@ -13,7 +15,8 @@ pub use connection::Connection;
 mod update;
 pub use update::*;
 
-pub use deny::Deny;
+mod input;
+pub use input::InputData;
 
-mod datatype;
-pub use datatype::DataType;
+mod output;
+pub use output::OutputData;
