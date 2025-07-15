@@ -2,6 +2,7 @@ use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
 
 use crate::data::{Connection, InputData, Hosts, Update};
+use crate::server::logic::connection;
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
@@ -53,70 +54,9 @@ let mut hosts = Hosts::new();
 loop {
     let data = InputData::parse(&socket)?;
     match data {
-        InputData::Connection(value) => {},
+        InputData::Connection(data) => connection(&mut hosts, data, &socket, instance.max_hosts)?,
         InputData::None => {},
         _ => eprintln!("not implemented yet"),
     }
 }
-}
-
-/// Handles a new connection ("handshake") from a client.
-///
-/// # Arguments
-/// * `data` - A `String` received from the client, expected to contain connection metadata (e.g., nickname).
-/// * `addr` - The `SocketAddr` (IP and port) of the client sending the data.
-/// * `hosts` - A mutable reference to the list of known hosts in the network.
-/// * `socket` - The `UdpSocket` used to communicate with clients.
-///
-/// # Returns
-/// * `Result<(), Error>` - Returns Ok if the handshake succeeds, or an Error if parsing or serialization fails.
-fn handshake(
-    data: String,
-    addr: SocketAddr,
-    hosts: &mut Vec<Update>,
-    socket: &UdpSocket,
-) -> Result<(), Error> {
-    // Parse the received string to extract connection info (e.g., nickname).
-    let v = Connection::from_string(data)?;
-
-    // Create a new entity representing this client, with a default position.
-    // in xyd : posX, posY, direction in rad
-    // TODO: ADD SPAWN CONFIGURATION
-    let e = Update::new(addr, v.nickname, (16.0, 16.0, 0.0));
-    hosts.push(e.clone());
-    let data = e.to_string()?;
-    let addrs = hosts.iter().map(|host| host.clone().addr).collect::<Vec<SocketAddr>>();
-    let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
-
-    Ok(())
-}
-
-/// Broadcasts a message to a list of socket addresses via UDP.
-///
-/// # Arguments
-/// * `socket` - The UDP socket to use for sending messages.
-/// * `from` - An optional address to exclude from the broadcast (e.g., the sender).
-/// * `hosts` - A list of socket addresses to which the message should be sent.
-/// * `data` - The message (as a string) to be broadcast.
-///
-/// # Returns
-/// * `std::io::Result<()>` - Returns Ok if all messages are sent successfully, or an error otherwise.
-fn broadcast(
-    socket: UdpSocket,
-    from: Option<SocketAddr>,
-    hosts: Vec<SocketAddr>,
-    data: String,
-) -> std::io::Result<()> {
-    for addr in hosts {
-        // Skip sending the message back to the sender (if specified).
-        match from {
-            Some(current_host) => if current_host == addr { continue; },
-            None => {},
-        }
-
-        // Send the data to the target address.
-        socket.send_to(data.as_bytes(), addr)?;
-    }
-
-    Ok(())
 }
