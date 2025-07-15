@@ -1,6 +1,7 @@
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
-use crate::server::data::{Deny, Entity, Host, OnConnection};
+
+use crate::data::{Update,DataType,Connection};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
@@ -18,7 +19,7 @@ type Error = Box<dyn std::error::Error>;
 pub struct Instance {
     port: u32,
     frequency: u32,
-    max_hosts: u8, // default 4,
+    max_hosts: u8, // 4 by default can be changed
 }
 
 impl Instance {
@@ -48,38 +49,14 @@ impl Instance {
 
 /// Running loop of the server
 fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
-    let mut hosts: Vec<Host> = Vec::new();
-    loop {
-            let mut buf = [0;1024];
-            let opts = match socket.recv_from(&mut buf) {
-                Ok(v) => Some(v),
-                // ! IMPORTANT NON BLOQUANT
-                Err(e) => {
-                    if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {return Err(Box::new(e));}
-                    None
-                }
-            };
-            match opts {
-                Some((size,addr)) => {
-                    let data = String::from_utf8(buf[..size].to_vec())?;
-                    //* MAX PLAYER CASE
-                    if hosts.len() == instance.max_hosts as usize { 
-                        let data = Deny {reason: format!("max number ({}) of players has been reached ",instance.max_hosts)};
-                        socket.send_to(data.to_string()?.as_bytes(), addr)?;
-                        continue;
-                    }
-                    //* FIRST CONNECTION (Handshake)
-                    if !hosts.iter().any(|v | v.addr == addr) {
-                        handshake(data, addr, &mut hosts, &socket)?;                 
-                    } 
-                    else {
-                        
-                    }
-                }
-                None => {},
-            }
-            // dbg!(&hosts);
-        }
+let mut hosts: Vec<Update> = Vec::new();
+loop {
+    let data = DataType::parse(&socket)?;
+    match data {
+        DataType::Connection(value) => {},
+        _ => eprintln!("not implemented yet"),
+    }
+}
 }
 
 /// Handles a new connection ("handshake") from a client.
@@ -95,28 +72,19 @@ fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
 fn handshake(
     data: String,
     addr: SocketAddr,
-    hosts: &mut Vec<Host>,
+    hosts: &mut Vec<Update>,
     socket: &UdpSocket,
 ) -> Result<(), Error> {
     // Parse the received string to extract connection info (e.g., nickname).
-    let v = OnConnection::from_string(data)?;
+    let v = Connection::from_string(data)?;
 
     // Create a new entity representing this client, with a default position.
-    let e = Entity::new(addr, v.nickname, (16.0, 16.0, 0.0));
-
-    // Create a host instance associated with this entity and address.
-    let h = Host::new(e.clone(), addr);
-
-    // Add the new host to the list of connected hosts.
-    hosts.push(h.clone());
-
-    // Serialize the entity to a string to send to other clients.
+    // in xyd : posX, posY, direction in rad
+    // TODO: ADD SPAWN CONFIGURATION
+    let e = Update::new(addr, v.nickname, (16.0, 16.0, 0.0));
+    hosts.push(e.clone());
     let data = e.to_string()?;
-
-    // Gather addresses of all current hosts to broadcast the new connection.
     let addrs = hosts.iter().map(|host| host.clone().addr).collect::<Vec<SocketAddr>>();
-
-    // Broadcast the new entity to all other clients.
     let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
 
     Ok(())

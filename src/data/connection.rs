@@ -1,11 +1,17 @@
-use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
 
-#[derive(Deserialize,Serialize)]
-pub struct OnConnection {
+use serde::{Deserialize, Serialize};
+use super::entity::default_addr;
+
+#[derive(Deserialize,Serialize,Debug)]
+pub struct Connection {
+    #[serde(skip, default = "default_addr")]
+    pub addr: SocketAddr,
+
     pub nickname: String,
 }
 
-impl OnConnection {
+impl Connection {
     pub fn to_string(&self) -> Result<std::string::String, serde_json::Error> {
         serde_json::to_string(self)
     }

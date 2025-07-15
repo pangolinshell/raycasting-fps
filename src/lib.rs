@@ -1,6 +1,7 @@
 pub mod world;
 pub mod entities;
 pub mod display;
+pub mod data;
 mod error;
 
 mod rays;
