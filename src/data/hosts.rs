@@ -1,5 +1,5 @@
 use std::net::SocketAddr;
-use crate::data::Host;
+use crate::data::{Host, Update};
 use std::ops::{Deref, DerefMut};
 
 #[derive(Debug,Clone)]
@@ -25,13 +25,21 @@ impl Hosts {
         None
     }
 
-    pub fn get_from_nickname(&self,nickname: &str) -> Option<&Host> {
-        for host in &self.hosts {
-            if host.nickname == nickname {
+    pub fn get_from_addr_mut(&mut self, addr: SocketAddr) -> Option<&mut Host> {
+        for host in &mut self.hosts {
+            if host.addr == addr {
                 return Some(host);
             }
         }
         None
+    }
+
+    pub fn update(&mut self,data: Update) -> i8 {
+        let host = match self.get_from_addr_mut(data.addr) {
+            Some(v) => v,
+            None => return -1,
+        };
+        host.update(data) as i8
     }
 }
 
