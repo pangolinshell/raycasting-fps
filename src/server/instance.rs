@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
 
 use crate::data::{Connection, InputData, Hosts, Update};
-use crate::server::logic::connection;
+use crate::server::logic::{connection, update};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
@@ -55,7 +55,8 @@ loop {
     let data = InputData::parse(&socket)?;
     match data {
         InputData::Connection(data) => connection(&mut hosts, data, &socket, instance.max_hosts)?,
-        InputData::None => {},
+        InputData::Update(data) => update(&mut hosts, data, &socket)?,
+        InputData::None => (),
         _ => eprintln!("not implemented yet"),
     }
 }
