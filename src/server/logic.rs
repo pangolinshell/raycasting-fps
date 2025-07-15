@@ -1,6 +1,6 @@
 use std::{error::Error, net::{SocketAddr, UdpSocket}};
 
-use crate::data::{Connection, Deny, Host, Hosts, OutputData};
+use crate::data::{Connection, Deny, Host, Hosts, OutputData, Update};
 
 /// Broadcasts a message to a list of socket addresses via UDP.
 ///
@@ -70,7 +70,14 @@ pub fn connection(hosts: &mut Hosts,data: Connection,socket: &UdpSocket,max_host
     let new_host = Host::init(data, (16.0,16.0,16.0));
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;
-    broadcast(socket, None, hosts, serialized)?;
     hosts.push(new_host);
+    broadcast(socket, None, hosts, serialized)?;
+    Ok(())
+}
+
+pub fn update(hosts: &mut Hosts,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
+    let msg = OutputData::Update(data.clone());
+    let serialized = serde_json::to_string(&msg)?;
+    broadcast(socket, Some(data.addr), hosts, serialized)?;
     Ok(())
 }
