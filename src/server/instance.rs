@@ -1,6 +1,6 @@
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
-use crate::server::data::{Deny, Entity, OnConnection};
+use crate::server::data::{Deny, Entity, Host, OnConnection};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
 
@@ -48,7 +48,7 @@ impl Instance {
 
 /// Running loop of the server
 fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
-    let mut hosts: Vec<Entity> = Vec::new();
+    let mut hosts: Vec<Host> = Vec::new();
     loop {
             let mut buf = [0;1024];
             let opts = match socket.recv_from(&mut buf) {
@@ -69,11 +69,11 @@ fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
                         continue;
                     }
                     //* FIRST CONNECTION (Handshake)
-                    if !hosts.iter().any(|v | v.addr == addr.to_string()) {
+                    if !hosts.iter().any(|v | v.addr == addr) {
                         handshake(data, addr, &mut hosts, &socket)?;                 
                     } 
                     else {
-
+                        
                     }
                 }
                 None => {},
@@ -83,20 +83,21 @@ fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
 }
 
 /// Handle all first connection between the server and client
-fn handshake(data: String,addr: SocketAddr, hosts: &mut Vec<Entity>,socket: &UdpSocket) -> Result<(),Error>{
+fn handshake(data: String,addr: SocketAddr, hosts: &mut Vec<Host>,socket: &UdpSocket) -> Result<(),Error>{
     let v = OnConnection::from_string(data)?;
     let e = Entity::new(addr, v.nickname, (16.0,16.0,0.0));
-    hosts.push(e.clone());
+    let h = Host::new(e.clone(), addr);
+    hosts.push(h.clone());
     let data = e.to_string()?;
-    let addrs = hosts.iter().map(|v| v.clone().addr).collect::<Vec<String>>();
+    let addrs = hosts.iter().map(|host| host.clone().addr).collect::<Vec<SocketAddr>>();
     let _ = broadcast(socket.try_clone().unwrap(), None, addrs, data);
     Ok(())
 }
 
-fn broadcast(socket: UdpSocket,from: Option<SocketAddr>,hosts: Vec<String>,data: String) -> std::io::Result<()> {
+fn broadcast(socket: UdpSocket,from: Option<SocketAddr>,hosts: Vec<SocketAddr>,data: String) -> std::io::Result<()> {
     for addr in hosts {
         match from {
-            Some(v) => if v.to_string() == addr {continue;},
+            Some(current_host) => if current_host == addr {continue;},
             None => {},
         }
         socket.send_to(data.as_bytes(), addr)?;
