@@ -4,13 +4,13 @@ use std::rc::Rc;
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
 use crate::{utils::vecs::*, world::Map};
 use std::cmp::Ordering;
-use crate::player::Player;
+use crate::camera::Camera;
 
 /// `RenderData` encapsulates all data required to render an entity (e.g., sprite)
 /// in a pseudo-3D environment using raycasting techniques.
 ///
 /// # Fields
-/// - `camera`: The player struct representing the viewpoint (position, direction, FOV).
+/// - `camera`: The Camera struct representing the viewpoint (position, direction, FOV).
 /// - `map`: The game map, used to determine visibility and wall collisions.
 /// - `position`: The (x, y) coordinates of the entity.
 /// - `_direction`: Direction the entity is facing (currently unused).
@@ -19,17 +19,17 @@ use crate::player::Player;
 /// # Methods
 /// - `new`: Constructs a new `RenderData`.
 /// - `display`: Renders the entity on the SDL2 canvas if visible.
-/// - `distance_to_player`: Calculates Euclidean distance to the player.
+/// - `distance_to_player`: Calculates Euclidean distance to the Camera.
 /// - `is_visible`: Checks if the entity is visible (within FOV and not obstructed).
-/// - `is_in_fov`: Checks if the entity lies within the player's field of view.
+/// - `is_in_fov`: Checks if the entity lies within the Camera's field of view.
 /// - `is_behind_a_wall`: Uses DDA raycasting to check for wall obstruction.
 ///
 /// # Traits
 /// Implements `PartialEq`, `PartialOrd`, `Eq`, and `Ord` to allow sorting
 /// entities by distance (useful for painter's algorithm).
 pub struct RenderData<'a> {
-    /// The player's viewpoint (position, direction, FOV)
-    camera: Player,
+    /// The Camera's viewpoint (position, direction, FOV)
+    camera: Camera,
     /// The game map used for collision and visibility checks
     map: Map<'a>,
     /// The entity's position in the world
@@ -42,7 +42,7 @@ pub struct RenderData<'a> {
 
 impl<'a> RenderData<'a> {
     /// Creates a new `RenderData` instance
-    pub fn new(camera: Player, map: Map<'a>, position: FPoint, direction: f32, texture: Rc<Texture<'a>>) -> Self {
+    pub fn new(camera: Camera, map: Map<'a>, position: FPoint, direction: f32, texture: Rc<Texture<'a>>) -> Self {
         Self {
             camera,
             map: map.clone(),
@@ -52,7 +52,7 @@ impl<'a> RenderData<'a> {
         }
     }
 
-    /// Renders the entity to the screen if it is visible to the player.
+    /// Renders the entity to the screen if it is visible to the Camera.
     ///
     /// Performs coordinate transformation and draws the texture
     /// to the appropriate location and size on the SDL2 canvas.
@@ -108,14 +108,14 @@ impl<'a> RenderData<'a> {
         Ok(())
     }
 
-    /// Computes Euclidean distance from the entity to the given player.
-    fn distance_to_player(&self, player: &Player) -> f32 {
-        let (p_x, p_y) = player.position;
+    /// Computes Euclidean distance from the entity to the given Camera.
+    fn distance_to_player(&self, Camera: &Camera) -> f32 {
+        let (p_x, p_y) = Camera.position;
         let (s_x, s_y) = self.position;
         f32::sqrt((p_x - s_x).powi(2) + (p_y - s_y).powi(2))
     }
 
-    /// Determines whether the entity is visible to the player.
+    /// Determines whether the entity is visible to the Camera.
     fn is_visible(&self, map: Map) -> bool {
         self.is_in_fov() && !self.is_behind_a_wall(map)
     }
@@ -143,7 +143,7 @@ impl<'a> RenderData<'a> {
         dot >= half_fov_cos
     }
 
-    /// Uses DDA raycasting to check if a wall is between the player and the entity.
+    /// Uses DDA raycasting to check if a wall is between the Camera and the entity.
     fn is_behind_a_wall(&self, map: Map) -> bool {
         let (start_x, start_y) = self.camera.position;
         let (end_x, end_y) = (self.position.0, self.position.1);

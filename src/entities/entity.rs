@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use sdl2::{rect::FPoint, render::Texture};
 
-use crate::{entities::{render_data::RenderData}, world::Map,player::Player};
+use crate::{entities::{render_data::RenderData}, world::Map,camera::Camera};
 
 
 /// The `Entity` trait defines the common interface for all game entities.
@@ -18,7 +18,7 @@ use crate::{entities::{render_data::RenderData}, world::Map,player::Player};
 /// - `update(&mut self, ctx: Option<&mut Context<'a>>) -> Result<(), String>`: Updates the entity's state, possibly using a mutable context. Returns `Ok(())` on success or an error message on failure.
 ///
 /// # Provided Methods
-/// - `into_render(&self, camera: Player, map: &Map<'a>) -> RenderData<'a>`: Converts the entity into render data for drawing, using the camera and map.
+/// - `into_render(&self, camera: Camera, map: &Map<'a>) -> RenderData<'a>`: Converts the entity into render data for drawing, using the camera and map.
 /// - `into_placement_data(&self) -> PlacementData`: Converts the entity into placement data, including position, direction, and type.
 pub trait Entity<'a> {
     fn position(&self) -> (f32,f32);
@@ -27,7 +27,7 @@ pub trait Entity<'a> {
 
     fn texture(&self) -> Rc<Texture<'a>>;
     fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String>;
-    fn into_render(&self, camera: Player, map: &Map<'a>) -> RenderData<'a> {
+    fn into_render(&self, camera: Camera, map: &Map<'a>) -> RenderData<'a> {
         RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture())
     }
     fn into_placement_data(&self) -> PlacementData {
@@ -54,14 +54,14 @@ pub struct PlacementData {
 }
 
 /// Represents the context for an entity, containing references to the current map,
-/// the player, and other entities' placement data.
+/// the Camera, and other entities' placement data.
 ///
 /// # Fields
 /// - `map`: The current game map context.
-/// - `player`: The player entity associated with this context.
+/// - `Camera`: The Camera entity associated with this context.
 /// - `others`: A collection of placement data for other entities in the game.
 pub struct Context<'a> {
     pub map: Map<'a>,
-    pub player: Player,
+    pub Camera: Camera,
     pub others:  Vec<PlacementData>,
 }

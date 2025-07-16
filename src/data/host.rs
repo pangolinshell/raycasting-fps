@@ -11,7 +11,7 @@ pub struct Host {
     pub addr: SocketAddr,
 
     /// Host's nickname or identifier.
-    pub nickname: String,
+    pub nickname: String, // Nicknames are uniques
 
     /// X coordinate of the host's position.
     pub x: f32,

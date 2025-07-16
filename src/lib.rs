@@ -7,6 +7,6 @@ mod error;
 mod rays;
 pub mod frames;
 pub mod utils;
-pub mod player;
+pub mod camera;
 pub mod server;
 pub mod client;

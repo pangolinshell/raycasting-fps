@@ -1,4 +1,5 @@
 use std::{error::Error, net::{SocketAddr, UdpSocket}};
+
 use crate::data::{Host, Hosts, Connection, OutputData, Deny, Update};
 
 // use data::{Connection, Deny, Host, Hosts, OutputData, Update};
@@ -68,11 +69,19 @@ pub fn connection(hosts: &mut Hosts,data: Connection,socket: &UdpSocket,max_host
         socket.send_to(serialized.as_bytes(),data.addr)?;
     }
     // TODO : add map modularity
+    let addr = data.addr;
     let new_host = Host::init(data, (16.0,16.0,16.0));
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;
+    // Send new host data to all hosts
+    let hosts_without_new = hosts.clone();
     hosts.push(new_host);
     broadcast(socket, None, hosts, serialized)?;
+
+    // Send other hosts data to all other users
+    let msg = OutputData::Connecting(hosts_without_new.clone());
+    let serialized = serde_json::to_string(&msg)?;
+    socket.send_to(serialized.as_bytes(), addr)?;
     Ok(())
 }
 

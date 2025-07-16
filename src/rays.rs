@@ -1,6 +1,6 @@
 use std::{cell::RefCell,rc::Rc};
 use sdl2::{rect::Rect, render::Texture};
-use crate::{display::Display, player::Player, world::Map};
+use crate::{display::Display, camera::Camera, world::Map};
 
 #[derive(Clone)]
 pub struct Ray<'a> {
@@ -47,7 +47,7 @@ impl<'a> Rays<'a> {
 
 impl<'a> Display<'a> for Rays<'a>{
     #[allow(unused)]
-    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,from: Option<Player>,map: Option<&Map>) -> Result<(),String> {
+    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,from: Option<Camera>,map: Option<&Map>) -> Result<(),String> {
         let v_rect = canvas.viewport();
         let (_,h) = (v_rect.width(),v_rect.height());
         for (x,ray) in self.rays.iter().enumerate() {

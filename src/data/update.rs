@@ -19,7 +19,7 @@ pub struct Update {
     #[serde(skip, default = "default_addr")]
     pub addr: SocketAddr,
 
-    // pub nickname: String,
+    pub nickname: String,
     pub x: Option<f32>,
     pub y: Option<f32>,
     pub d: Option<f32>,
@@ -27,10 +27,10 @@ pub struct Update {
 }
 
 impl Update {
-    pub fn new(addr: SocketAddr,xyd: (f32,f32,f32)) -> Self {
+    pub fn new(addr: SocketAddr,nickname:String,xyd: (f32,f32,f32)) -> Self {
         Self { 
             addr,
-            // nickname: nickname,
+            nickname,
             x: Some(xyd.0),
             y: Some(xyd.1),
             d: Some(xyd.2),

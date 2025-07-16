@@ -1,9 +1,11 @@
 use std::net::SocketAddr;
+use serde::{Deserialize, Serialize};
+
 use crate::data::{Host, Update};
 use std::ops::{Deref, DerefMut};
 
 /// A collection managing multiple `Host` instances.
-#[derive(Debug, Clone)]
+#[derive(Serialize,Deserialize,Debug, Clone)]
 pub struct Hosts {
     hosts: Vec<Host>,
 }

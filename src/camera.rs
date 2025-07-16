@@ -5,13 +5,13 @@ use sdl2::{keyboard::Scancode};
 use crate::{rays::{Ray, Rays}, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
 
 #[derive(Debug,Clone, Copy)]
-pub struct Player {
+pub struct Camera {
     pub position: (f32,f32),
     pub direction: f32,
     pub fov_factor: f32,
 }
 
-impl Player {
+impl Camera {
     pub fn new(pos_x: f32,pos_y: f32,dir: f32) -> Self {
         Self { position: (pos_x,pos_y), direction: dir, fov_factor: 0.5 }
     }

@@ -1,6 +1,6 @@
 use std::net::UdpSocket;
 
-use crate::data::{Deny, Host, Update};
+use crate::data::{Deny, Host, Hosts, Update};
 pub use serde::{Deserialize,Serialize};
 
 #[derive(Deserialize,Serialize, Debug)]
@@ -8,6 +8,7 @@ pub use serde::{Deserialize,Serialize};
 pub enum OutputData {
     Update(Update),
     AccessDeny(Deny),
+    Connecting(Hosts),
     New(Host),
     Unknown,
     None,
@@ -29,7 +30,6 @@ impl OutputData {
             }
         };
 
-        // 
         let (size, addr) = match opts {
             Some(values) => values,
             None => return Ok(Self::Unknown),

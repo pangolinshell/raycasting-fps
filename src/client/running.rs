@@ -12,6 +12,5 @@ pub fn run(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn Error
     let serialized = serde_json::to_string(&data)?;
     socket.send_to(serialized.as_bytes(), server)?;
     loop {
-        
     }
 }
