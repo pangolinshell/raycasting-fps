@@ -7,7 +7,7 @@ use std::ops::{Deref, DerefMut};
 /// A collection managing multiple `Host` instances.
 #[derive(Serialize,Deserialize,Debug, Clone)]
 pub struct Hosts {
-    hosts: Vec<Host>,
+    pub hosts: Vec<Host>,
 }
 
 impl Hosts {
