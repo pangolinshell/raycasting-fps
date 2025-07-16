@@ -19,17 +19,18 @@ type Error = Box<dyn std::error::Error>;
 /// - `max_hosts`: The maximum number of hosts allowed to connect (default is 4).
 pub struct Instance {
     port: u32,
-    frequency: u32,
+    _frequency: u32,
     max_hosts: u8, // 4 by default can be changed
 }
 
 impl Instance {
     /// Create a new server instance
-    pub fn new(port: u32, frequency: u32) -> Self {
-        Self { port, frequency,max_hosts:DEFAULT_MAX_HOSTS, }
+    pub fn new(port: u32, _frequency: u32) -> Self {
+        Self { port, _frequency,max_hosts:DEFAULT_MAX_HOSTS, }
     }
 
     /// Set the max number of hosts
+    #[allow(unused)]
     pub fn set_max_hosts(&mut self, value: u8) {
         self.max_hosts = value;
     }

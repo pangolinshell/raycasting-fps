@@ -1,4 +1,4 @@
-use std::{net::{Ipv4Addr, SocketAddr, SocketAddrV4}, time::Instant};
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use serde::{Deserialize, Serialize};
 
 
@@ -27,7 +27,7 @@ pub struct Update {
 }
 
 impl Update {
-    pub fn new(addr: SocketAddr,nickname: String,xyd: (f32,f32,f32)) -> Self {
+    pub fn new(addr: SocketAddr,xyd: (f32,f32,f32)) -> Self {
         Self { 
             addr,
             // nickname: nickname,

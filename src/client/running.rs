@@ -1,6 +1,5 @@
 use std::error::Error;
-use std::net::{SocketAddr};
-use std::{net::UdpSocket};
+use std::net::{UdpSocket,SocketAddr};
 use std::time::Duration;
 
 use crate::data::{self, default_addr, InputData};

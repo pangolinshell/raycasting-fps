@@ -1,4 +1,4 @@
-use std::{net::UdpSocket, os::unix::net::SocketAddr};
+use std::net::UdpSocket;
 
 use crate::data::{Update, Connection};
 use serde::{Deserialize, Serialize};
@@ -9,8 +9,8 @@ pub enum InputData {
     Connection(Connection),
     Update(Update),
     Disconnection,
-    Unknown,
-    None,
+    Unknown, // Malformed request
+    None, // nothing recieved
 }
 
 impl InputData {

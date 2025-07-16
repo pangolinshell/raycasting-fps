@@ -9,7 +9,7 @@ pub struct Deny {
 
 impl Deny {
     pub fn from_string(data: String) -> Result<Self, Box<dyn std::error::Error>> {
-        let mut v: Self = serde_json::from_str(&data.as_str())?;
+        let v: Self = serde_json::from_str(&data.as_str())?;
         Ok(v)
     }
 
