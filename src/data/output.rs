@@ -8,7 +8,7 @@ pub use serde::{Deserialize,Serialize};
 pub enum OutputData {
     Update(Update),
     AccessDeny(Deny),
-    Connecting(Hosts),
+    Connecting((Host,Hosts)),
     New(Host),
     Unknown,
     None,

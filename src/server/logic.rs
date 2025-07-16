@@ -75,11 +75,11 @@ pub fn connection(hosts: &mut Hosts,data: Connection,socket: &UdpSocket,max_host
     let serialized = serde_json::to_string(&msg)?;
     // Send new host data to all hosts
     let hosts_without_new = hosts.clone();
-    hosts.push(new_host);
-    broadcast(socket, None, hosts, serialized)?;
+    hosts.push(new_host.clone());
+    broadcast(socket, Some(addr), hosts, serialized)?;
 
     // Send other hosts data to all other users
-    let msg = OutputData::Connecting(hosts_without_new.clone());
+    let msg = OutputData::Connecting((new_host,hosts_without_new.clone()));
     let serialized = serde_json::to_string(&msg)?;
     socket.send_to(serialized.as_bytes(), addr)?;
     Ok(())
