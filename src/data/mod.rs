@@ -1,4 +1,3 @@
-#![allow(unused)]
 
 mod deny;
 pub use deny::Deny;

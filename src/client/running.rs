@@ -1,29 +1,18 @@
-use std::net::UdpSocket;
+use std::error::Error;
+use std::net::{SocketAddr};
+use std::{net::UdpSocket};
 use std::time::Duration;
 
-use crate::server::data::OnConnection;
+use crate::data::{self, default_addr, InputData};
 
-pub fn run_client(server_addr: &str,port: u32,name: String) -> std::io::Result<()> {
-    let socket = UdpSocket::bind(format!("0.0.0.0:{}",port))?; // Port aléatoire local
+pub fn run(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn Error>> {
+    let socket = UdpSocket::bind(format!("127.0.0.1:{}",port))?; // Port aléatoire local
+    let server: SocketAddr = server_addr.parse()?;
     socket.set_read_timeout(Some(Duration::from_secs(2)))?; // Timeout lecture
-
-    let connection_data = OnConnection {nickname: name}.to_string()?;
-
-    let msg = connection_data.as_bytes();
-    socket.send_to(msg, server_addr)?;
-
-    let mut buf = [0u8; 1024];
-    match socket.recv_from(&mut buf) {
-        Ok((n, src)) => {
-            let response = String::from_utf8_lossy(&buf[..n]);
-            println!("Réponse de {}: {}", src, response);
-        }
-        Err(e) => {
-            if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {
-                println!("Erreur de réception: {}", e);
-            }
-        }
+    let data = InputData::Connection(data::Connection {addr: default_addr(),nickname: name});
+    let serialized = serde_json::to_string(&data)?;
+    socket.send_to(serialized.as_bytes(), server)?;
+    loop {
+        
     }
-
-    Ok(())
 }

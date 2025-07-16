@@ -1,7 +1,7 @@
-use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
+use std::net::{Ipv4Addr, UdpSocket};
 use std::thread;
 
-use crate::data::{Connection, InputData, Hosts, Update};
+use crate::data::{InputData, Hosts};
 use crate::server::logic::{connection, update};
 
 const DEFAULT_MAX_HOSTS: u8 = 4;
@@ -54,9 +54,14 @@ let mut hosts = Hosts::new();
 loop {
     let data = InputData::parse(&socket)?;
     match data {
-        InputData::Connection(data) => connection(&mut hosts, data, &socket, instance.max_hosts)?,
+        InputData::Connection(data) => {
+            let addr = data.addr;
+            connection(&mut hosts, data, &socket, instance.max_hosts)?;
+            println!("{:?}: connection", addr);
+        },
         InputData::Update(data) => update(&mut hosts, data, &socket)?,
         InputData::None => (),
+        InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
         _ => eprintln!("not implemented yet"),
     }
 }

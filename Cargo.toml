@@ -1,7 +1,11 @@
 [package]
-name = "multiplayer-fps-v3"
+name = "multiplayer_fps"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "multiplayer_fps"
+path = "src/lib.rs"
 
 [dependencies]
 clap = { version = "4.5.40", features = ["derive"] }

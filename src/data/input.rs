@@ -1,9 +1,9 @@
 use std::{net::UdpSocket, os::unix::net::SocketAddr};
 
-use crate::server::data::{Update, Connection};
+use crate::data::{Update, Connection};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize,Serialize, Debug)]
 #[serde(tag = "type",content = "data")] // <= ajoute un champ "type" dans le JSON
 pub enum InputData {
     Connection(Connection),
@@ -32,7 +32,7 @@ impl InputData {
         // 
         let (size, addr) = match opts {
             Some(values) => values,
-            None => return Ok(InputData::Unknown),
+            None => return Ok(InputData::None),
         };
 
         let data = String::from_utf8(buf[..size].to_vec())
