@@ -5,6 +5,7 @@ use std::time::Duration;
 use crate::data::{self, default_addr, InputData};
 
 pub fn run(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn Error>> {
+    println!("starting client");
     let socket = UdpSocket::bind(format!("127.0.0.1:{}",port))?; // Port aléatoire local
     let server: SocketAddr = server_addr.parse()?;
     socket.set_read_timeout(Some(Duration::from_secs(2)))?; // Timeout lecture
