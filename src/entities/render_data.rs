@@ -109,8 +109,8 @@ impl<'a> RenderData<'a> {
     }
 
     /// Computes Euclidean distance from the entity to the given Camera.
-    fn distance_to_player(&self, Camera: &Camera) -> f32 {
-        let (p_x, p_y) = Camera.position;
+    fn distance_to_player(&self, camera: &Camera) -> f32 {
+        let (p_x, p_y) = camera.position;
         let (s_x, s_y) = self.position;
         f32::sqrt((p_x - s_x).powi(2) + (p_y - s_y).powi(2))
     }

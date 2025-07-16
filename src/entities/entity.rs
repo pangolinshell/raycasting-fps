@@ -62,6 +62,6 @@ pub struct PlacementData {
 /// - `others`: A collection of placement data for other entities in the game.
 pub struct Context<'a> {
     pub map: Map<'a>,
-    pub Camera: Camera,
+    pub camera: Camera,
     pub others:  Vec<PlacementData>,
 }

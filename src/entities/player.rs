@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use sdl2::render::Texture;
 
-use crate::{data::{Host, Update}, entities::Entity};
+use crate::{data::{Host, Hosts, Update}, entities::Entity};
 
 pub struct Player<'a> {
     pub data: Host,
@@ -29,6 +29,7 @@ impl<'a> Entity<'a> for Player<'a> {
         (self.data.x,self.data.y)
     }
 
+    
     fn update(&mut self,ctx: Option<&mut super::Context<'a>>) -> Result<(),String> {
         Ok(())
     }
@@ -39,5 +40,28 @@ impl<'a> Entity<'a> for Player<'a> {
 
     fn texture(&self) -> std::rc::Rc<sdl2::render::Texture<'a>> {
         self.texture.clone()
+    }
+}
+
+pub struct Players<'a> {
+    pub players: Vec<Player<'a>>,
+}
+
+impl<'a> Players<'a> {
+    pub fn from(hosts: Hosts,texture: Rc<Texture<'a>>) -> Self {
+        let mut players = Vec::new();
+        for host in hosts.hosts {
+            players.push(Player::new(host, texture.clone()));
+        }
+        Self { players: players }
+    }
+
+    pub fn update(&mut self,data: Update) -> Option<u8> {
+        for p in self.players.iter_mut() {
+            if p.data.nickname == data.nickname {
+                return Some(p.data.update(data));
+            }
+        }
+        None
     }
 }
