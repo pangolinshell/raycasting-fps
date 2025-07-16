@@ -1,4 +1,6 @@
 mod server;
+mod resources;
+
 pub mod world;
 pub mod entities;
 pub mod display;
