@@ -36,7 +36,7 @@ impl Instance {
     }
 
     pub fn run(&self) -> std::io::Result<()> {
-        let socket = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(127, 0, 0, 1),self.port))?;
+        let socket = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(0, 0, 0, 0),self.port))?;
         socket.set_nonblocking(true)?;
         let instance = self.clone();
         thread::spawn(move || {
