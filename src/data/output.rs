@@ -26,7 +26,7 @@ impl OutputData {
                 if !matches!(e.kind(), std::io::ErrorKind::WouldBlock) {
                     return Err(Box::new(e));
                 }
-                None
+                return Ok(Self::None);
             }
         };
 
