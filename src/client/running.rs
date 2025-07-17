@@ -3,6 +3,8 @@ use std::net::{UdpSocket,SocketAddr};
 use std::time::Duration;
 
 use crate::data::{self, default_addr, InputData, OutputData};
+use crate::entities::{Player, Players};
+use super::loading::*;
 
 pub fn run(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn Error>> {
     println!("starting client");
@@ -14,11 +16,12 @@ pub fn run(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn Error
     let data = InputData::Connection(data::Connection {addr: default_addr(),nickname: name});
     let serialized = serde_json::to_string(&data)?;
     socket.send_to(serialized.as_bytes(), server)?;
+    let mut players = Players::new();
     loop {
         let data = OutputData::parse(&socket)?;
         match data {
             OutputData::Connecting((me,others)) => {
-                println!("got it!")
+
             }
             OutputData::None => println!("waiting"),
             _ => println!("not what i am waiting for"),

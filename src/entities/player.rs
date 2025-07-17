@@ -48,6 +48,10 @@ pub struct Players<'a> {
 }
 
 impl<'a> Players<'a> {
+    pub fn new() -> Self {
+        Self { players: Vec::new() }
+    }
+
     pub fn from(hosts: Hosts,texture: Rc<Texture<'a>>) -> Self {
         let mut players = Vec::new();
         for host in hosts.hosts {
