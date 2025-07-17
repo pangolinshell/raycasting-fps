@@ -71,7 +71,7 @@
         },
         "fonts": {
             "proggy_clean_NF_MonoRegular": {
-                "file": "ProggyCleanCENerdFontMono-Regular.ttf",
+                "path": "ProggyCleanCENerdFontMono-Regular.ttf",
                 "size": 16
             }
         }        

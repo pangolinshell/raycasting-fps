@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read};
 
+use crate::resources::{self, ResourceManager};
+
 /// Alias for a named identifier, typically used for assets (e.g. texture names).
 type Name = String;
 
@@ -61,8 +63,8 @@ pub struct Resources {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Fonts {
-    file: Path,
-    size: u16,
+    pub path: Path,
+    pub size: u16,
 }
 
 impl Resources {
@@ -105,7 +107,7 @@ impl Resources {
         };
 
         for (name, font) in &self.fonts {
-            match t_map.insert(name.clone(), (format!("{}{}", t_dir, font.file),font.size)) {
+            match t_map.insert(name.clone(), (format!("{}{}", t_dir, font.path),font.size)) {
                 Some(_) => return Err(format!("key {} is in double", name.clone()).into()),
                 None => (),
             };
@@ -113,6 +115,7 @@ impl Resources {
 
         Ok(t_map)
     }
+
 }
 
 impl Loader {

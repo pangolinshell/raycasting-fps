@@ -1,30 +1,23 @@
-// mod server;
-// pub mod resources;
+use multiplayer_fps::resources::{ResourceManager,TextureManager};
 
-// pub mod world;
-// pub mod entities;
-// pub mod display;
-// pub mod data;
-// pub mod error;
-// pub mod rays;
-// pub mod frames;
-// pub mod utils;
-// pub mod camera;
-// pub mod client;
+use sdl2::video::WindowContext;
 
-use std::error::Error;
-
-// use server::Instance;
-// use client::run;
-use multiplayer_fps::resources::ResourcesManager;
-use multiplayer_fps::world::n_loader::Loader;
-
-fn main() -> Result<(),Box<dyn Error>> {
-    // let instance = Instance::new(5000, 60);
-    // let _ = instance.run();
-    // run("127.0.0.1:5000", 0, String::from("Guest")).unwrap();
-    let loader = Loader::from_file("conf/map1.jsonc")?;
-    let mut rm = ResourcesManager::new("test", (120,120))?;
-    rm.load_font_from_resources(loader.get_resources().clone())?;
+fn main() -> Result<(), String> {
+    let sdl_ctx = sdl2::init()?;
+    let video_subsys = sdl_ctx.video()?;
+    let win = video_subsys.window("test", 100, 100).position_centered().build().map_err(|e| e.to_string())?;
+    let mut canvas = win
+            .into_canvas()
+            .software()
+            .build()
+            .map_err(|e| e.to_string())?;
+    let t_loader = canvas.texture_creator();
+    // Specify the key type (e.g., String) and value type (e.g., Texture)
+    let mut texture_manager: TextureManager<WindowContext> = ResourceManager::new(&t_loader);
+    texture_manager.load("redbrick","assets/img/redbrick.png")?;
+    match texture_manager.get("redbrick") {
+        Some(v) => println!("found"),
+        None => println!("not found"),
+    }
     Ok(())
 }
