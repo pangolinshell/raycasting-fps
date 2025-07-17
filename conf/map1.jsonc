@@ -32,7 +32,7 @@
         "3":"wood",
         "4":"bluestone",
         "5":"eagle",
-        "6":"mossy",
+        "6":"mossy"
     },
     "spawnpoints": [
         { "x": 8, "y": 17 },
@@ -56,7 +56,7 @@
         { "x": 9, "y": 6 }
     ],
     "resources": {
-        "texture_directory": "assets/img/",
+        "textures_directory": "assets/img/",
         "font_directory": "assets/fonts/",
         "textures": {
             "redbrick": "redbrick.png",
@@ -70,7 +70,10 @@
             "placeholder":"placeholder.png"
         },
         "fonts": {
-            "proggy_clean_NF_MonoRegular": "ProggyCleanCENerdFontMono-Regular.ttf",
+            "proggy_clean_NF_MonoRegular": {
+                "file": "ProggyCleanCENerdFontMono-Regular.ttf",
+                "size": 16
+            }
         }        
     }
 }

@@ -10,3 +10,4 @@ pub mod utils;
 pub mod camera;
 pub mod server;
 pub mod client;
+pub mod resources;

@@ -27,7 +27,6 @@ impl Level {
         file.read_to_end(&mut buffer)?;
         let s = String::from_utf8(buffer)?;
         let level: Level = serde_json::from_str(s.as_str())?;
-        // You probably want to deserialize here, e.g.:
         Ok(level)
     }
 }
