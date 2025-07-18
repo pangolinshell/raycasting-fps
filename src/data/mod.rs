@@ -2,11 +2,11 @@
 mod deny;
 pub use deny::Deny;
 
-mod host;
-pub use host::Player;
+mod player;
+pub use player::Player;
 
-mod hosts;
-pub use hosts::Players;
+mod players;
+pub use players::Players;
 
 mod connection;
 pub use connection::Connection;
