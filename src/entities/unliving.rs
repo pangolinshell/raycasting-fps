@@ -16,14 +16,17 @@ impl<'a> NotMoving<'a> {
     }
 }
 
-impl<'a> Entity<'a> for NotMoving<'a> {
-    fn position(&self) -> (f32,f32) {
+impl<'a> Movable for NotMoving<'a> {
+        fn position(&self) -> (f32,f32) {
         self.position
     }
 
     fn direction(&self) -> f32 {
         0.0
     }
+}
+
+impl<'a> Entity<'a> for NotMoving<'a> {
 
     fn entity_type(&self) -> entity::EntityType {
         entity::EntityType::UnLiving

@@ -115,7 +115,6 @@ impl Resources {
 
         Ok(t_map)
     }
-
 }
 
 impl Loader {
@@ -150,8 +149,8 @@ impl<'a> From<&'a Fonts> for FontDetails {
     }
 }
 
- impl<'a> From<&'a Loader> for Map {
-    fn from(value: &'a Loader) -> Self {
+ impl<'a> From<Loader> for Map {
+    fn from(value: Loader) -> Self {
         let mut layout: Vec<Tile> = Vec::new();
         let t_map: HashMap<u8,String> = value.textures_bindings.clone();
         for (y,line) in value.layout.iter().enumerate() {

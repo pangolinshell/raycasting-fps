@@ -1,23 +1,84 @@
-use multiplayer_fps::resources::{ResourceManager,TextureManager};
+extern crate sdl2;
+use std::collections::HashMap;
 
-use sdl2::video::WindowContext;
+use multiplayer_fps::display::Display;
+use multiplayer_fps::frames::FramesCtrl;
+use multiplayer_fps::resources::TextureManager;
+use sdl2::pixels::{Color};
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::rect::Rect;
+use sdl2::render::{Canvas};
+use sdl2::video::{Window};
+use sdl2::EventPump;
 
-fn main() -> Result<(), String> {
-    let sdl_ctx = sdl2::init()?;
-    let video_subsys = sdl_ctx.video()?;
-    let win = video_subsys.window("test", 100, 100).position_centered().build().map_err(|e| e.to_string())?;
-    let mut canvas = win
-            .into_canvas()
-            .software()
-            .build()
-            .map_err(|e| e.to_string())?;
-    let t_loader = canvas.texture_creator();
-    // Specify the key type (e.g., String) and value type (e.g., Texture)
-    let mut texture_manager: TextureManager<WindowContext> = ResourceManager::new(&t_loader);
-    texture_manager.load("redbrick","assets/img/redbrick.png")?;
-    match texture_manager.get("redbrick") {
-        Some(v) => println!("found"),
-        None => println!("not found"),
+use multiplayer_fps::world::{ Map};
+use multiplayer_fps::{camera, frames, utils, Loader};
+use multiplayer_fps::entities::{Context, PlacementData, RenderData,Entity,};
+use multiplayer_fps::camera::Camera;
+
+const WIN_RES: (u32,u32) = (1280, 1280);
+const DISP_RES: (u32,u32) = (1280,1024);
+
+
+fn clear(canvas: &mut Canvas<Window>) {
+    canvas.set_draw_color(Color::BLACK);
+    canvas.clear();
+}
+
+fn event(e:&mut EventPump) -> Option<u32>{
+    for event in e.poll_iter() {
+        match event {
+            Event::Quit {..} |
+            Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                return Some(0);
+            },
+            _ => {}
+        }
     }
-    Ok(())
+    return None;
+}
+
+pub fn main() -> Result<(),Box<dyn std::error::Error>>{
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
+
+    let map_loader = Loader::from_file("conf/map2.jsonc")?;
+
+    let mut frames = FramesCtrl::init(60);
+
+    let window = video_subsystem.window("rust-sdl2 demo", WIN_RES.0, WIN_RES.1)
+        .position_centered()
+        .build()
+        .unwrap();
+    let mut epump = sdl_context.event_pump()?;
+
+    let mut canvas = window.into_canvas().build()?;
+    let mut camera = Camera::new(16.0,16.0, 0.0);
+
+    let loader = canvas.texture_creator();
+    let mut texture_manager = TextureManager::new(&loader);
+    let texture_map = map_loader.get_resources().textures()?;
+    let tmap: HashMap<&str, &str> = texture_map.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
+    texture_manager.load_from_map(tmap)?;
+    let map = Map::from(map_loader);
+    loop {
+        frames.start_frame();
+        clear(&mut canvas);
+        match event(&mut epump) {
+            Some(v) => if v == 0 {
+                return Ok(());
+            }
+            None => (),
+        }
+        camera.inputs(&mut epump, frames.dtime as f32);
+        let mut rays = camera.cast_rays(map.clone(), WIN_RES.0);
+        canvas.set_viewport(Rect::new(0, 0, DISP_RES.0, DISP_RES.1));
+        rays.display(&mut canvas, None::<multiplayer_fps::entities::Player>, Some(&texture_manager))?;
+        frames.end_frame();
+        canvas.set_viewport(Rect::new(0, 0, 1280, 1280));
+        canvas.set_draw_color(Color::GRAY);
+        canvas.fill_rect(Rect::new(0, 1024, 1280, 250))?;
+        canvas.present();
+    }
 }

@@ -16,7 +16,10 @@ impl Camera {
         Self { position: (pos_x,pos_y), direction: dir, fov_factor: 0.5 }
     }
 
-    pub fn cast_rays<'a,'l,T>(&self, map: Map, w: u32,tm: TextureManager<'l,T>) -> Rays {
+    pub fn cast_rays//<'a,'l,T>
+    (&self, map: Map, w: u32
+        // tm: &TextureManager<'l,T>
+    ) -> Rays {
         let mut rays: Vec<Ray> = Vec::new();
         let (pos_x,pos_y) = self.position;
         let (dir_x,dir_y) = from_direction(self.direction);

@@ -15,6 +15,7 @@ pub type MutableTextureManager<'l,T> = ResourceManager<'l, String, RefCell<Textu
 pub type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2TtfContext>;
 
 // Generic struct to cache any resource loaded by a ResourceLoader
+#[derive(Clone)]
 pub struct ResourceManager<'l, K, R, L>
 where
     K: Hash + Eq,
@@ -80,7 +81,7 @@ where
 impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
     type Args = str;
     fn load(&'l self, path: &str) -> Result<Texture, String> {
-        println!("LOADED A TEXTURE");
+        // println!("LOADED A TEXTURE");
         self.load_texture(path)
     }
 }
@@ -89,7 +90,7 @@ impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
 impl<'l> ResourceLoader<'l, Font<'l, 'static>> for Sdl2TtfContext {
     type Args = FontDetails;
     fn load(&'l self, details: &FontDetails) -> Result<Font<'l, 'static>, String> {
-        println!("LOADED A FONT");
+        // println!("LOADED A FONT");
         self.load_font(&details.path, details.size)
     }
 }
@@ -101,7 +102,7 @@ pub trait ResourceLoader<'l, R> {
 }
 
 // Information needed to load a Font
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct FontDetails {
     pub path: String,
     pub size: u16,

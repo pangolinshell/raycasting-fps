@@ -50,7 +50,7 @@ impl Rays {
 
 impl Display for Rays{
     #[allow(unused)]
-    fn display<'l, M, T>(&mut self, canvas: &mut Canvas<Window>, from: Option<M>, textures: Option<TextureManager<'l, T>>) -> Result<(), String>
+    fn display<'l, M, T>(&mut self, canvas: &mut Canvas<Window>, from: Option<M>, textures: Option<&TextureManager<'l, T>>) -> Result<(), String>
     where
         M: Movable,
     {
