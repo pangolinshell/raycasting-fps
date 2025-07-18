@@ -80,7 +80,7 @@ pub fn connection(players: &mut PlayersData,data: Connection,socket: &UdpSocket,
     // Send new host data to all Players
     let hosts_without_new = players.clone();
     players.push(new_host.clone());
-    broadcast(socket, Some(addr), players, serialized)?;
+    // broadcast(socket, Some(addr), players, serialized)?;
 
     // Send other Players data to all other users
     let msg = OutputData::Connecting((new_host,hosts_without_new.clone(),loader));
