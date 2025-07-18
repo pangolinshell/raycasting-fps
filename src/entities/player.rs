@@ -2,17 +2,17 @@ use std::rc::Rc;
 
 use sdl2::render::Texture;
 
-use crate::{data::{Host, Hosts, Update}, entities::{entity::Movable, Entity}};
+use crate::{data::{Player as DataPlayer, Players as DataPlayers, Update}, entities::{entity::Movable, Entity}};
 
 pub struct Player<'a> {
-    pub data: Host,
+    pub data: DataPlayer,
 
     pub texture: Rc<Texture<'a>>
 }
 
 impl<'a> Player<'a> {
-    pub fn new(host: Host,texture: Rc<Texture<'a>>) -> Self {
-        Self { data: host, texture: texture.clone() }
+    pub fn new(DataPlayer: DataPlayer,texture: Rc<Texture<'a>>) -> Self {
+        Self { data: DataPlayer, texture: texture.clone() }
     }
 
     pub fn update(&mut self,data: Update) -> u8 {
@@ -53,10 +53,10 @@ impl<'a> Players<'a> {
         Self { players: Vec::new() }
     }
 
-    pub fn from(hosts: Hosts,texture: Rc<Texture<'a>>) -> Self {
+    pub fn from(data_players: DataPlayers,texture: Rc<Texture<'a>>) -> Self {
         let mut players = Vec::new();
-        for host in hosts.hosts {
-            players.push(Player::new(host, texture.clone()));
+        for player in data_players.player {
+            players.push(Player::new(player, texture.clone()));
         }
         Self { players: players }
     }

@@ -3,38 +3,38 @@ use serde::{Deserialize, Serialize};
 
 use crate::data::{Connection, Status, Update,default_addr};
 
-/// Represents a connected host with its state and identity.
+/// Represents a connected Player with its state and identity.
 #[derive(Debug, Clone,Serialize,Deserialize)]
-pub struct Host {
-    /// IP address and port of the host.
+pub struct Player {
+    /// IP address and port of the Player.
     #[serde(skip, default = "default_addr")]
     pub addr: SocketAddr,
 
-    /// Host's nickname or identifier.
+    /// Player's nickname or identifier.
     pub nickname: String, // Nicknames are uniques
 
-    /// X coordinate of the host's position.
+    /// X coordinate of the Player's position.
     pub x: f32,
 
-    /// Y coordinate of the host's position.
+    /// Y coordinate of the Player's position.
     pub y: f32,
 
-    /// Direction (angle or heading) of the host.
+    /// Direction (angle or heading) of the Player.
     pub d: f32,
 
     /// Current status (Alive, Disconnected, etc.).
     pub status: Status,
 }
 
-impl Host {
-    /// Initializes a new `Host` from a `Connection` message and initial coordinates.
+impl Player {
+    /// Initializes a new `Player` from a `Connection` message and initial coordinates.
     ///
     /// # Arguments
     /// * `value` - The incoming `Connection` containing address and nickname.
     /// * `xyd` - A tuple containing initial x, y, and direction values.
     ///
     /// # Returns
-    /// A new `Host` instance.
+    /// A new `Player` instance.
     pub fn init(value: Connection, xyd: (f32, f32, f32)) -> Self {
         Self {
             addr: value.addr,
@@ -46,7 +46,7 @@ impl Host {
         }
     }
 
-    /// Updates the current host state with non-None values from an `Update`.
+    /// Updates the current Player state with non-None values from an `Update`.
     ///
     /// # Arguments
     /// * `data` - An `Update` struct containing optional new values.

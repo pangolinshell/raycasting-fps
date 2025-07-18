@@ -1,15 +1,15 @@
 use std::{error::Error, net::{SocketAddr, UdpSocket}};
 
-use crate::data::{Host, Hosts, Connection, OutputData, Deny, Update};
+use crate::data::{Player, Players, Connection, OutputData, Deny, Update};
 
-// use data::{Connection, Deny, Host, Hosts, OutputData, Update};
+// use data::{Connection, Deny, Host, Players, OutputData, Update};
 
 /// Broadcasts a message to a list of socket addresses via UDP.
 ///
 /// # Arguments
 /// * `socket` - The UDP socket to use for sending messages.
 /// * `from` - An optional address to exclude from the broadcast (e.g., the sender).
-/// * `hosts` - A list of socket addresses to which the message should be sent.
+/// * `Players` - A list of socket addresses to which the message should be sent.
 /// * `data` - The message (as a string) to be broadcast.
 ///
 /// # Returns
@@ -17,10 +17,10 @@ use crate::data::{Host, Hosts, Connection, OutputData, Deny, Update};
 pub fn broadcast(
     socket: &UdpSocket,
     from: Option<SocketAddr>,
-    hosts: &Hosts,
+    Players: &Players,
     data: String,
 ) -> std::io::Result<()> {
-    for addr in hosts.iter() {
+    for addr in Players.iter() {
         // Skip sending the message back to the sender (if specified).
         match from {
             Some(current_host) => if current_host == addr.addr { continue; },
@@ -44,41 +44,41 @@ pub fn broadcast(
 /// - A broadcast message is sent to all clients with the new host's data.
 ///
 /// # Arguments
-/// * `hosts` - The current list of connected hosts (mutable reference).
+/// * `Players` - The current list of connected Players (mutable reference).
 /// * `data` - The connection data received from the client.
 /// * `socket` - The UDP socket used for communication.
-/// * `max_hosts` - The maximum number of allowed hosts.
+/// * `max_hosts` - The maximum number of allowed Players.
 ///
 /// # Returns
 /// * `Ok(())` on success.
 /// * `Err(Box<dyn Error>)` if any error occurs during processing (e.g., serialization or socket errors).
-pub fn connection(hosts: &mut Hosts,data: Connection,socket: &UdpSocket,max_hosts: u8) -> Result<(),Box<dyn Error>>{
-    if hosts.get_from_nickname(&data.nickname).is_some() {
+pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_hosts: u8) -> Result<(),Box<dyn Error>>{
+    if players.get_from_nickname(&data.nickname).is_some() {
         let msg = OutputData::AccessDeny(Deny {reason: format!("the nickname \"{}\" is already used",data.nickname)});
         let serialized = serde_json::to_string(&msg)?;
         socket.send_to(serialized.as_bytes(),data.addr)?;
     }
-    if hosts.get_from_addr(data.addr).is_some() {
+    if players.get_from_addr(data.addr).is_some() {
         let msg = OutputData::AccessDeny(Deny {reason: format!("the address \"{}\" is already used",data.addr)});
         let serialized = serde_json::to_string(&msg)?;
         socket.send_to(serialized.as_bytes(),data.addr)?;
     }
-    if hosts.len() == max_hosts as usize {
-        let msg = OutputData::AccessDeny(Deny {reason: format!("server full ({}/{})",hosts.len(),max_hosts)});
+    if players.len() == max_hosts as usize {
+        let msg = OutputData::AccessDeny(Deny {reason: format!("server full ({}/{})",players.len(),max_hosts)});
         let serialized = serde_json::to_string(&msg)?;
         socket.send_to(serialized.as_bytes(),data.addr)?;
     }
     // TODO : add map modularity
     let addr = data.addr;
-    let new_host = Host::init(data, (16.0,16.0,16.0));
+    let new_host = Player::init(data, (16.0,16.0,16.0));
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;
-    // Send new host data to all hosts
-    let hosts_without_new = hosts.clone();
-    hosts.push(new_host.clone());
-    broadcast(socket, Some(addr), hosts, serialized)?;
+    // Send new host data to all Players
+    let hosts_without_new = players.clone();
+    players.push(new_host.clone());
+    broadcast(socket, Some(addr), players, serialized)?;
 
-    // Send other hosts data to all other users
+    // Send other Players data to all other users
     let msg = OutputData::Connecting((new_host,hosts_without_new.clone()));
     let serialized = serde_json::to_string(&msg)?;
     socket.send_to(serialized.as_bytes(), addr)?;
@@ -86,9 +86,9 @@ pub fn connection(hosts: &mut Hosts,data: Connection,socket: &UdpSocket,max_host
 }
 
 // TODO : Add shooting verification
-pub fn update(hosts: &mut Hosts,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
+pub fn update(Players: &mut Players,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
     let msg = OutputData::Update(data.clone());
     let serialized = serde_json::to_string(&msg)?;
-    broadcast(socket, Some(data.addr), hosts, serialized)?;
+    broadcast(socket, Some(data.addr), Players, serialized)?;
     Ok(())
 }

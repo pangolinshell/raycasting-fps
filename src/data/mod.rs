@@ -3,10 +3,10 @@ mod deny;
 pub use deny::Deny;
 
 mod host;
-pub use host::Host;
+pub use host::Player;
 
 mod hosts;
-pub use hosts::Hosts;
+pub use hosts::Players;
 
 mod connection;
 pub use connection::Connection;

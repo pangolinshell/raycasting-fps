@@ -7,6 +7,14 @@ edition = "2021"
 name = "multiplayer_fps"
 path = "src/lib.rs"
 
+[[bin]]
+name = "server"
+path = "src/server/main.rs"
+
+[[bin]]
+name = "client"
+path = "src/client/main.rs"
+
 [dependencies]
 clap = { version = "4.5.40", features = ["derive"] }
 gl = "0.14.0"
