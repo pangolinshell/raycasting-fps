@@ -11,3 +11,6 @@ pub mod camera;
 pub mod server;
 pub mod client;
 pub mod resources;
+
+mod n_loader;
+pub use n_loader::*;

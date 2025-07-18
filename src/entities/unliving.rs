@@ -34,7 +34,7 @@ impl<'a> Entity<'a> for NotMoving<'a> {
     }
 
     #[allow(unused_variables)]
-    fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String> {
+    fn update(&mut self,ctx: Option<&mut Context>) -> Result<(),String> {
         Ok(())
     }
 }

@@ -4,21 +4,21 @@ use sdl2::{pixels::Color, rect::{Point, Rect}};
 
 use super::display::Display;
 
-pub struct Minimap<'a> {
-    map: Rc<Map<'a>>,
+pub struct Minimap {
+    map: Rc<Map>,
     display: Rect,
     wall_size: u32,
 }
 
-impl<'a> Minimap<'a> {
-    pub fn new(map: Map<'a>, wall_size: u32, size: u32, position: Point) -> Self {
+impl Minimap {
+    pub fn new(map: Map, wall_size: u32, size: u32, position: Point) -> Self {
         Self { map: Rc::new(map), display: Rect::new(position.x, position.y, size, size), wall_size }
     }
 }
 
-impl<'a> Display<'a> for Minimap<'a> {
+impl<'a> Display for Minimap {
     #[allow(unused)]
-    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, from: Option<Camera>, map: Option<&Map>) -> Result<(),String> {
+    fn display<T>(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, from: Option<T>, map: Option<&Map>) -> Result<(),String> {
         let vp = canvas.viewport();
         canvas.set_viewport(self.display);
         canvas.set_draw_color(Color::GRAY);

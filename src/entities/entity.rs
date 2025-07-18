@@ -5,6 +5,11 @@ use sdl2::{rect::FPoint, render::Texture};
 use crate::{entities::{render_data::RenderData}, world::Map,camera::Camera};
 
 
+pub trait Movable {
+    fn position(&self) -> (f32,f32);
+    fn direction(&self) -> f32;  
+}
+
 /// The `Entity` trait defines the common interface for all game entities.
 /// 
 /// # Type Parameters
@@ -20,14 +25,12 @@ use crate::{entities::{render_data::RenderData}, world::Map,camera::Camera};
 /// # Provided Methods
 /// - `into_render(&self, camera: Camera, map: &Map<'a>) -> RenderData<'a>`: Converts the entity into render data for drawing, using the camera and map.
 /// - `into_placement_data(&self) -> PlacementData`: Converts the entity into placement data, including position, direction, and type.
-pub trait Entity<'a> {
-    fn position(&self) -> (f32,f32);
-    fn direction(&self) -> f32;
+pub trait Entity<'a>: Movable {
     fn entity_type(&self) -> EntityType;
 
     fn texture(&self) -> Rc<Texture<'a>>;
-    fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String>;
-    fn into_render(&self, camera: Camera, map: &Map<'a>) -> RenderData<'a> {
+    fn update(&mut self,ctx: Option<&mut Context>) -> Result<(),String>;
+    fn into_render(&self, camera: Camera, map: &Map) -> RenderData<'a> {
         RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture())
     }
     fn into_placement_data(&self) -> PlacementData {
@@ -60,8 +63,8 @@ pub struct PlacementData {
 /// - `map`: The current game map context.
 /// - `Camera`: The Camera entity associated with this context.
 /// - `others`: A collection of placement data for other entities in the game.
-pub struct Context<'a> {
-    pub map: Map<'a>,
+pub struct Context {
+    pub map: Map,
     pub camera: Camera,
     pub others:  Vec<PlacementData>,
 }

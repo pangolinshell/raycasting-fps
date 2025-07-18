@@ -72,7 +72,7 @@ impl<'a> Entity<'a> for Pather<'a> {
     }
 
     #[allow(unused_variables)]
-    fn update(&mut self,ctx: Option<&mut Context<'a>>) -> Result<(),String> {
+    fn update(&mut self,ctx: Option<&mut Context>) -> Result<(),String> {
         if delta(self.position, (self.way[self.target].x,self.way[self.target].y)) <= self.speed {
             self.target = if self.target == self.way.len() - 1 {0} else {self.target + 1};
         }
@@ -82,3 +82,4 @@ impl<'a> Entity<'a> for Pather<'a> {
         Ok(())
     }
 }
+

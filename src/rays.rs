@@ -1,31 +1,33 @@
 use std::{cell::RefCell,rc::Rc};
-use sdl2::{rect::Rect, render::Texture};
-use crate::{display::Display, camera::Camera, world::Map};
+use sdl2::{rect::Rect, render::{Canvas, Texture}, video::Window};
+use crate::{camera::Camera, display::Display, entities::Movable, resources::TextureManager, world::Map};
 
 #[derive(Clone)]
-pub struct Ray<'a> {
+pub struct Ray {
     dist: f32,
     ray_dir_x: f32,
     ray_dir_y: f32,
 
     pos_x: f32,
     pos_y: f32,
-    texture: Rc<RefCell<Texture<'a>>>,
+    // texture: Rc<RefCell<Texture>>,
+    t_id: String,
     side: bool,
 }
 
 #[derive(Clone)]
-pub struct Rays<'a>{
-    rays: Vec<Ray<'a>>,
+pub struct Rays{
+    rays: Vec<Ray>,
 }
 
-impl<'a> Ray<'a> {
+impl Ray {
     pub fn new(
         dist: f32,
         side: bool,
         ray_dir: (f32, f32),
         pos: (f32, f32),
-        texture: Rc<RefCell<Texture<'a>>>,
+        texture_id: String,
+        // texture: Rc<RefCell<Texture>>,
     ) -> Self {
         Self {
             dist,
@@ -34,20 +36,28 @@ impl<'a> Ray<'a> {
             ray_dir_y: ray_dir.1,
             pos_x: pos.0,
             pos_y: pos.1,
-            texture: texture.clone(),
+            // texture: texture.clone(),
+            t_id: texture_id,
         }
     }
 }
 
-impl<'a> Rays<'a> {
-    pub fn from(vec: Vec<Ray<'a>>) -> Self {
+impl Rays {
+    pub fn from(vec: Vec<Ray>) -> Self {
         Self { rays: vec }
     }
 }
 
-impl<'a> Display<'a> for Rays<'a>{
+impl Display for Rays{
     #[allow(unused)]
-    fn display(&mut self,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,from: Option<Camera>,map: Option<&Map>) -> Result<(),String> {
+    fn display<'l, M, T>(&mut self, canvas: &mut Canvas<Window>, from: Option<M>, textures: Option<TextureManager<'l, T>>) -> Result<(), String>
+    where
+        M: Movable,
+    {
+        let textures = match textures {
+            Some(v) => v,
+            None => return Err(format!("must have a resources manager")),
+        };
         let v_rect = canvas.viewport();
         let (_,h) = (v_rect.width(),v_rect.height());
         for (x,ray) in self.rays.iter().enumerate() {
@@ -77,14 +87,17 @@ impl<'a> Display<'a> for Rays<'a>{
                (draw_end - draw_start) as u32,
             );
 
-            let texture = &ray.texture;
+            let texture = match textures.get(&ray.t_id) {
+                Some(v) => v,
+                None => return Err(format!("texture not found : {}", ray.t_id))
+            };
 
-            let mut tmp_texture = texture.borrow_mut();
-            if ray.side {
-                tmp_texture.set_color_mod(150, 150, 150);
-            }
-            canvas.copy(&tmp_texture, Rect::new(tex_x, 0, 1, 64), rect)?;
-            tmp_texture.set_color_mod(255, 255, 255);
+            // let mut tmp_texture = texture;
+            // if ray.side {
+            //     // tmp_texture.set_color_mod(150, 150, 150);
+            // }
+            canvas.copy(&texture, Rect::new(tex_x, 0, 1, 64), rect)?;
+            // tmp_texture.set_color_mod(255, 255, 255);
         }
         Ok(())
     }

@@ -1,7 +1,8 @@
+use sdl2::rect::Point;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read};
 
-use crate::resources::{self, ResourceManager};
+use crate::{resources::FontDetails, world::{Map, Tile}};
 
 /// Alias for a named identifier, typically used for assets (e.g. texture names).
 type Name = String;
@@ -9,6 +10,7 @@ type Name = String;
 /// Alias for a file system path.
 type Path = String;
 
+/// Alias for the font size
 type Size = u16;
 
 /// Main structure representing a game map configuration.
@@ -42,8 +44,6 @@ struct SpawnPoint {
     /// Y coordinate in tile units.
     y: u8,
 }
-
-
 
 /// Structure holding paths to game resources like textures and fonts.
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -140,3 +140,25 @@ impl Loader {
         &self.resources
     }
 }
+
+impl<'a> From<&'a Fonts> for FontDetails {
+    fn from(details: &'a Fonts) -> Self {
+        Self {
+            path: details.path.clone(),
+            size: details.size,
+        }
+    }
+}
+
+ impl<'a> From<&'a Loader> for Map {
+    fn from(value: &'a Loader) -> Self {
+        let mut layout: Vec<Tile> = Vec::new();
+        let t_map: HashMap<u8,String> = value.textures_bindings.clone();
+        for (y,line) in value.layout.iter().enumerate() {
+            for (x,value) in line.iter().enumerate() {
+                layout.push(Tile::new(Point::new(x as i32, y as i32), *value));
+            } 
+        }
+        Map::new(layout, t_map, value.placeholder.clone())
+    }
+ }

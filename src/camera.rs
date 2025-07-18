@@ -2,7 +2,7 @@
 
 use sdl2::{keyboard::Scancode};
 
-use crate::{rays::{Ray, Rays}, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
+use crate::{rays::{Ray, Rays}, resources::TextureManager, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
 
 #[derive(Debug,Clone, Copy)]
 pub struct Camera {
@@ -16,7 +16,7 @@ impl Camera {
         Self { position: (pos_x,pos_y), direction: dir, fov_factor: 0.5 }
     }
 
-    pub fn cast_rays<'a>(&self, map: Map<'a>, w: u32) -> Rays<'a> {
+    pub fn cast_rays<'a,'l,T>(&self, map: Map, w: u32,tm: TextureManager<'l,T>) -> Rays {
         let mut rays: Vec<Ray> = Vec::new();
         let (pos_x,pos_y) = self.position;
         let (dir_x,dir_y) = from_direction(self.direction);
@@ -100,14 +100,19 @@ impl Camera {
                 Some(v) => v,
                 None => 0,
             };
+            let t_name = match map.texture_map.get(&tc) {
+                Some(v) => v,
+                None => &map.missing_texture,
+            };
             // // correction fisheye
             // let corrected_dist = perp_wall_dist * (raydir_x * dir_x + raydir_y * dir_y);
             //     / ((raydir_x.powi(2) + raydir_y.powi(2)).sqrt() * (dir_x.powi(2) + dir_y.powi(2)).sqrt());
-            let t = match map.textures.get(&tc) {
-                Some(t) => t.clone(),
-                None =>  map.missing.clone(),
-            };
-            rays.push(Ray::new(perp_wall_dist,side,(raydir_x,raydir_y),(pos_x,pos_y),t.clone()));
+            // let t = match map.textures.get(&tc) {
+            //     Some(t) => t.clone(),
+            //     None =>  map.missing.clone(),
+            // };
+            
+            rays.push(Ray::new(perp_wall_dist,side,(raydir_x,raydir_y),(pos_x,pos_y),t_name.clone()));
         }
         Rays::from(rays)
     }

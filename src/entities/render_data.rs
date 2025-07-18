@@ -31,7 +31,7 @@ pub struct RenderData<'a> {
     /// The Camera's viewpoint (position, direction, FOV)
     camera: Camera,
     /// The game map used for collision and visibility checks
-    map: Map<'a>,
+    map: Map,
     /// The entity's position in the world
     position: (f32,f32),
     /// The direction the entity is facing (unused)
@@ -42,7 +42,7 @@ pub struct RenderData<'a> {
 
 impl<'a> RenderData<'a> {
     /// Creates a new `RenderData` instance
-    pub fn new(camera: Camera, map: Map<'a>, position: FPoint, direction: f32, texture: Rc<Texture<'a>>) -> Self {
+    pub fn new(camera: Camera, map: Map, position: FPoint, direction: f32, texture: Rc<Texture<'a>>) -> Self {
         Self {
             camera,
             map: map.clone(),

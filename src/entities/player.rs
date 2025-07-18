@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use sdl2::render::Texture;
 
-use crate::{data::{Host, Hosts, Update}, entities::Entity};
+use crate::{data::{Host, Hosts, Update}, entities::{entity::Movable, Entity}};
 
 pub struct Player<'a> {
     pub data: Host,
@@ -20,7 +20,7 @@ impl<'a> Player<'a> {
     }
 }
 
-impl<'a> Entity<'a> for Player<'a> {
+impl<'a> Movable for Player<'a> {
     fn direction(&self) -> f32 {
         self.data.d
     }
@@ -28,9 +28,10 @@ impl<'a> Entity<'a> for Player<'a> {
     fn position(&self) -> (f32,f32) {
         (self.data.x,self.data.y)
     }
+}
 
-    
-    fn update(&mut self,ctx: Option<&mut super::Context<'a>>) -> Result<(),String> {
+impl<'a> Entity<'a> for Player<'a> {
+    fn update(&mut self,ctx: Option<&mut super::Context>) -> Result<(),String> {
         Ok(())
     }
 
