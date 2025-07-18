@@ -19,3 +19,6 @@ pub use input::InputData;
 
 mod output;
 pub use output::OutputData;
+
+mod map;
+pub use map::Map;
