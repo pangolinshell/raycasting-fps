@@ -1,6 +1,10 @@
 use std::{error::Error, net::{SocketAddr, UdpSocket}};
 
-use crate::data::{Player, Players, Connection, OutputData, Deny, Update};
+use multiplayer_fps::data::{Connection, Deny, InputData, OutputData, PlayerData, PlayersData, Update};
+use multiplayer_fps::Loader;
+
+use crate::args::Args;
+
 
 // use data::{Connection, Deny, Host, Players, OutputData, Update};
 
@@ -17,7 +21,7 @@ use crate::data::{Player, Players, Connection, OutputData, Deny, Update};
 pub fn broadcast(
     socket: &UdpSocket,
     from: Option<SocketAddr>,
-    Players: &Players,
+    Players: &PlayersData,
     data: String,
 ) -> std::io::Result<()> {
     for addr in Players.iter() {
@@ -52,7 +56,7 @@ pub fn broadcast(
 /// # Returns
 /// * `Ok(())` on success.
 /// * `Err(Box<dyn Error>)` if any error occurs during processing (e.g., serialization or socket errors).
-pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_hosts: u8) -> Result<(),Box<dyn Error>>{
+pub fn connection(players: &mut PlayersData,data: Connection,socket: &UdpSocket,max_hosts: u8,loader: Loader) -> Result<(),Box<dyn Error>>{
     if players.get_from_nickname(&data.nickname).is_some() {
         let msg = OutputData::AccessDeny(Deny {reason: format!("the nickname \"{}\" is already used",data.nickname)});
         let serialized = serde_json::to_string(&msg)?;
@@ -70,7 +74,7 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
     }
     // TODO : add map modularity
     let addr = data.addr;
-    let new_host = Player::init(data, (16.0,16.0,16.0));
+    let new_host = PlayerData::init(data, (16.0,16.0,16.0));
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;
     // Send new host data to all Players
@@ -79,16 +83,35 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
     broadcast(socket, Some(addr), players, serialized)?;
 
     // Send other Players data to all other users
-    let msg = OutputData::Connecting((new_host,hosts_without_new.clone()));
+    let msg = OutputData::Connecting((new_host,hosts_without_new.clone(),loader));
     let serialized = serde_json::to_string(&msg)?;
     socket.send_to(serialized.as_bytes(), addr)?;
     Ok(())
 }
 
 // TODO : Add shooting verification
-pub fn update(Players: &mut Players,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
+pub fn update(Players: &mut PlayersData,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
     let msg = OutputData::Update(data.clone());
     let serialized = serde_json::to_string(&msg)?;
     broadcast(socket, Some(data.addr), Players, serialized)?;
     Ok(())
+}
+
+pub fn running(socket: UdpSocket,instance: &Args) -> Result<(),Box<dyn Error>>  {
+let mut players = PlayersData::new();
+let map = Loader::from_file(&instance.map)?;
+loop {
+    let data = InputData::parse(&socket)?;
+    match data {
+        InputData::Connection(data) => {
+            let addr = data.addr;
+            connection(&mut players, data, &socket, instance.max_hosts,map.clone())?;
+            println!("{:?}: connection", addr);
+        },
+        InputData::Update(data) => update(&mut players, data, &socket)?,
+        InputData::None => (),
+        InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
+        _ => eprintln!("not implemented yet"),
+    }
+}
 }

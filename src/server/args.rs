@@ -11,4 +11,7 @@ pub struct Args {
     /// port number of the server. is random by default
     #[arg(short,long,default_value_t=0)]
     pub port: u32,
+
+    #[arg(short,long)]
+    pub map: String,
 }

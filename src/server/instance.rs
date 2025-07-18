@@ -35,35 +35,16 @@ impl Instance {
         self.max_hosts = value;
     }
 
-    pub fn run(&self) -> std::io::Result<()> {
-        let socket = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(0, 0, 0, 0),self.port))?;
-        socket.set_nonblocking(true)?;
-        let instance = self.clone();
-        thread::spawn(move || {
-            match running(socket, &instance) {
-                Ok(_) => println!("server stopped succesfully"),
-                Err(e) => println!("SERVER ERROR : {}",e.as_ref())
-            };
-        });
-        Ok(())
-    }
-}
-
-/// Running loop of the server
-pub fn running(socket: UdpSocket,instance: &Instance) -> Result<(),Error>  {
-let mut players = Players::new();
-loop {
-    let data = InputData::parse(&socket)?;
-    match data {
-        InputData::Connection(data) => {
-            let addr = data.addr;
-            connection(&mut players, data, &socket, instance.max_hosts)?;
-            println!("{:?}: connection", addr);
-        },
-        InputData::Update(data) => update(&mut players, data, &socket)?,
-        InputData::None => (),
-        InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
-        _ => eprintln!("not implemented yet"),
-    }
-}
+    // pub fn run(&self) -> std::io::Result<()> {
+    //     let socket = UdpSocket::bind(format!("{}:{}",Ipv4Addr::new(0, 0, 0, 0),self.port))?;
+    //     socket.set_nonblocking(true)?;
+    //     let instance = self.clone();
+    //     thread::spawn(move || {
+    //         match running(socket, &instance) {
+    //             Ok(_) => println!("server stopped succesfully"),
+    //             Err(e) => println!("SERVER ERROR : {}",e.as_ref())
+    //         };
+    //     });
+    //     Ok(())
+    // }
 }

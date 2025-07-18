@@ -3,10 +3,10 @@ mod deny;
 pub use deny::Deny;
 
 mod player;
-pub use player::Player;
+pub use player::PlayerData;
 
 mod players;
-pub use players::Players;
+pub use players::PlayersData;
 
 mod connection;
 pub use connection::Connection;
@@ -19,6 +19,3 @@ pub use input::InputData;
 
 mod output;
 pub use output::OutputData;
-
-mod map;
-pub use map::Map;

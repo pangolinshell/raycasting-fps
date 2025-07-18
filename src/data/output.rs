@@ -1,6 +1,6 @@
 use std::net::UdpSocket;
 
-use crate::data::{Deny, Map, Player, Players, Update};
+use crate::{data::{Deny, PlayerData, PlayersData, Update}, Loader};
 pub use serde::{Deserialize,Serialize};
 
 #[derive(Deserialize,Serialize, Debug)]
@@ -8,8 +8,8 @@ pub use serde::{Deserialize,Serialize};
 pub enum OutputData {
     Update(Update),
     AccessDeny(Deny),
-    Connecting((Player,Players,Map)),
-    New(Player),
+    Connecting((PlayerData,PlayersData,Loader)),
+    New(PlayerData),
     Unknown,
     None,
 }

@@ -5,7 +5,7 @@ use crate::data::{Connection, Status, Update,default_addr};
 
 /// Represents a connected Player with its state and identity.
 #[derive(Debug, Clone,Serialize,Deserialize)]
-pub struct Player {
+pub struct PlayerData {
     /// IP address and port of the Player.
     #[serde(skip, default = "default_addr")]
     pub addr: SocketAddr,
@@ -26,7 +26,7 @@ pub struct Player {
     pub status: Status,
 }
 
-impl Player {
+impl PlayerData {
     /// Initializes a new `Player` from a `Connection` message and initial coordinates.
     ///
     /// # Arguments
