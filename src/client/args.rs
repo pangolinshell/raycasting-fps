@@ -6,13 +6,13 @@ use clap::Parser;
 pub struct Args {
     /// host addr
     #[arg(short,long)]
-    host: Ipv4Addr,
+    pub host: Ipv4Addr,
 
     /// host port
     #[arg(short,long)]
-    port: u32,
+    pub port: u32,
 
     /// host port
     #[arg(long)]
-    nickname: String,
+    pub nickname: String,
 }

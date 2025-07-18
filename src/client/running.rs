@@ -21,7 +21,7 @@ pub fn run(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn Error
     loop {
         let data = OutputData::parse(&socket)?;
         match data {
-            OutputData::Connecting((me,others)) => {
+            OutputData::Connecting((me,others,map)) => {
                 let camera = camera::Camera::new(me.x, me.y, me.d);
             }
             OutputData::None => println!("waiting"),
@@ -42,7 +42,7 @@ pub fn running(server_addr: &str,port: u32,name: String) -> Result<(), Box<dyn E
     let mut players = Players::new();
     let data = OutputData::parse(&socket)?;
     let (camera) = match data {
-        OutputData::Connecting((me,others)) => {
+        OutputData::Connecting((me,others,map)) => {
             camera::Camera::new(me.x, me.y, me.d)
         }
         OutputData::None => return Err(format!("timout on loggin").into()),
