@@ -1,13 +1,13 @@
 mod args;
 use args::Args;
 use clap::Parser;
-use multiplayer_fps::{camera::Camera, entities::Player, frames::FramesCtrl, resources::TextureManager, world::Map};
+use multiplayer_fps::{camera::Camera, frames::FramesCtrl, resources::TextureManager, world::Map};
 
 mod logic;
 mod screen;
 
 use std::{error::Error, net::{SocketAddr, UdpSocket}, time::Duration};
-use sdl2::{event::Event, sys::KeyCode, video::{self, Window}, EventPump};
+use sdl2::{event::Event, EventPump};
 use sdl2::keyboard::Keycode;
 
 use crate::{logic::{connection, disconnection}, screen::window_init};
