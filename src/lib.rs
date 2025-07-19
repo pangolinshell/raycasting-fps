@@ -11,6 +11,7 @@ pub mod camera;
 pub mod server;
 pub mod client;
 pub mod resources;
+pub use resources::{TextureManager,ResourceLoader,ResourceManager,FontManager,FontDetails};
 
 mod n_loader;
 pub use n_loader::*;
