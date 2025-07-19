@@ -1,6 +1,6 @@
-use std::net::UdpSocket;
+use std::{net::UdpSocket, net::SocketAddr};
 
-use crate::data::{Update, Connection};
+use crate::data::{default_addr, Connection, Update};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize,Serialize, Debug)]
@@ -8,7 +8,10 @@ use serde::{Deserialize, Serialize};
 pub enum InputData {
     Connection(Connection),
     Update(Update),
-    Disconnection,
+    Disconnection {
+        #[serde(skip,default = "default_addr")]
+        addr: SocketAddr,
+    },
     Unknown, // Malformed request
     None, // nothing recieved
 }
@@ -30,7 +33,7 @@ impl InputData {
         };
 
         // 
-        let (size, addr) = match opts {
+        let (size, socket_addr) = match opts {
             Some(values) => values,
             None => return Ok(InputData::None),
         };
@@ -40,8 +43,9 @@ impl InputData {
 
         let mut msg = serde_json::from_str::<InputData>(&data).unwrap_or(InputData::Unknown);
         match &mut msg {
-            InputData::Update(value) => value.addr = addr,
-            InputData::Connection(value) => value.addr = addr,
+            InputData::Update(value) => value.addr = socket_addr,
+            InputData::Connection(value) => value.addr = socket_addr,
+            InputData::Disconnection { addr } => *addr = socket_addr,
             _ => {},
         }
         Ok(msg)
