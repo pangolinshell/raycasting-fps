@@ -31,10 +31,10 @@ impl PlayersData {
     ///
     /// # Returns
     /// An option containing a reference to the matching `Player`, or `None` if not found.
-    pub fn get_from_addr(&self, addr: SocketAddr) -> Option<&PlayerData> {
-        for player in &self.players {
+    pub fn get_from_addr(&self, addr: SocketAddr) -> Option<(usize,&PlayerData)> {
+        for (i,player) in self.players.iter().enumerate() {
             if player.addr == addr {
-                return Some(player);
+                return Some((i,player));
             }
         }
         None
