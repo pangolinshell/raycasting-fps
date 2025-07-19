@@ -2,7 +2,8 @@ use std::{net::{SocketAddr, UdpSocket}, time::Duration};
 
 use multiplayer_fps::{data::{self, default_addr, InputData, OutputData, PlayerData, PlayersData}, Loader};
 
-pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) -> Result<(PlayerData,PlayersData,Loader), Box<dyn std::error::Error>> {
+type Error = Box<dyn std::error::Error>;
+pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) -> Result<(PlayerData,PlayersData,Loader), Error> {
     let data = InputData::Connection(data::Connection {addr: default_addr(),nickname});
     let serialized = serde_json::to_string(&data)?;
     socket.send_to(serialized.as_bytes(), server)?;
@@ -14,4 +15,11 @@ pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) ->
         _ =>return Err(format!("Unexpected response type: {:?}", data).into()),
     };
     Ok((player,others,map))
+}
+
+pub fn disconnection(socket: &mut UdpSocket,server: SocketAddr) -> Result<(),Error> {
+    let data = InputData::Disconnection { addr: default_addr() };
+    let serialized = serde_json::to_string(&data)?;
+    socket.send_to(serialized.as_bytes(), server)?;
+    Ok(())
 }
