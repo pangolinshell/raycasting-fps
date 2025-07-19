@@ -11,8 +11,8 @@ pub struct Player<'a> {
 }
 
 impl<'a> Player<'a> {
-    pub fn new(DataPlayer: PlayerData,texture: Rc<Texture<'a>>) -> Self {
-        Self { data: DataPlayer, texture: texture.clone() }
+    pub fn new(player_data: PlayerData,texture: Rc<Texture<'a>>) -> Self {
+        Self { data: player_data, texture: texture.clone() }
     }
 
     pub fn update(&mut self,data: Update) -> u8 {
