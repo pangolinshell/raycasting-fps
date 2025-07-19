@@ -97,6 +97,15 @@ pub fn update(players: &mut PlayersData,data: Update,socket: &UdpSocket) -> Resu
     Ok(())
 }
 
+pub fn disconnection(players: &mut PlayersData, addr: SocketAddr) -> Result<(),Box<dyn Error>> {
+    let index = match players.get_from_addr(addr) {
+        Some((i,_)) => i,
+        None => return  Err(format!("the ip {} is not connected",addr).into()),
+    };
+    players.remove(index);
+    Ok(())
+}
+
 pub fn running(socket: UdpSocket,instance: &Args) -> Result<(),Box<dyn Error>>  {
 let mut players = PlayersData::new();
 let map = Loader::from_file(&instance.map)?;
@@ -112,6 +121,8 @@ loop {
             update(&mut players, data, &socket)?;
         },
         InputData::Disconnection {addr} => {
+            disconnection(&mut players, addr)?;
+            println!("the player of addr : {} has been succesfully removed",addr)
         }
         InputData::None => (),
         InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
