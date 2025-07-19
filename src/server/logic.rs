@@ -90,10 +90,10 @@ pub fn connection(players: &mut PlayersData,data: Connection,socket: &UdpSocket,
 }
 
 // TODO : Add shooting verification
-pub fn update(Players: &mut PlayersData,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
+pub fn update(players: &mut PlayersData,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
     let msg = OutputData::Update(data.clone());
     let serialized = serde_json::to_string(&msg)?;
-    broadcast(socket, Some(data.addr), Players, serialized)?;
+    broadcast(socket, Some(data.addr), players, serialized)?;
     Ok(())
 }
 
@@ -108,7 +108,11 @@ loop {
             connection(&mut players, data, &socket, instance.max_hosts,map.clone())?;
             println!("{:?}: connection", addr);
         },
-        InputData::Update(data) => update(&mut players, data, &socket)?,
+        InputData::Update(data) => {
+            update(&mut players, data, &socket)?;
+        },
+        InputData::Disconnection {addr} => {
+        }
         InputData::None => (),
         InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
         _ => eprintln!("not implemented yet"),
