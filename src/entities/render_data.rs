@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
-use crate::{utils::vecs::*, world::Map};
+use crate::{utils::vecs::*, world::Map, TextureManager};
 use std::cmp::Ordering;
 use crate::camera::Camera;
 
@@ -27,7 +27,7 @@ use crate::camera::Camera;
 /// # Traits
 /// Implements `PartialEq`, `PartialOrd`, `Eq`, and `Ord` to allow sorting
 /// entities by distance (useful for painter's algorithm).
-pub struct RenderData<'a> {
+pub struct RenderData {
     /// The Camera's viewpoint (position, direction, FOV)
     camera: Camera,
     /// The game map used for collision and visibility checks
@@ -37,12 +37,12 @@ pub struct RenderData<'a> {
     /// The direction the entity is facing (unused)
     _direction: f32,
     /// The texture used to draw the entity
-    texture: Rc<Texture<'a>>
+    texture: String
 }
 
-impl<'a> RenderData<'a> {
+impl RenderData {
     /// Creates a new `RenderData` instance
-    pub fn new(camera: Camera, map: Map, position: FPoint, direction: f32, texture: Rc<Texture<'a>>) -> Self {
+    pub fn new(camera: Camera, map: Map, position: FPoint, direction: f32, texture: String) -> Self {
         Self {
             camera,
             map: map.clone(),
@@ -56,7 +56,7 @@ impl<'a> RenderData<'a> {
     ///
     /// Performs coordinate transformation and draws the texture
     /// to the appropriate location and size on the SDL2 canvas.
-    pub fn display(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) -> Result<(),String> {
+    pub fn display<T>(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture_manager: TextureManager<T>) -> Result<(),String> {
         if !self.is_visible(self.map.clone()) {
             return Ok(());
         }
@@ -103,6 +103,10 @@ impl<'a> RenderData<'a> {
             (draw_end_x - draw_start_x) as u32,
             (draw_end_y - draw_start_y) as u32,
         );
+        let texture = match texture_manager.get(&self.texture) {
+            Some(texture) => texture,
+            None => return Err(format!("texture \"{}\" not found",self.texture)),
+        };
 
         canvas.copy(&*texture, src_rect, dst_rect)?;
         Ok(())
@@ -203,7 +207,7 @@ impl<'a> RenderData<'a> {
 
 // === Trait Implementations for Sorting ===
 
-impl<'a> PartialEq for RenderData<'a> {
+impl PartialEq for RenderData {
     /// Compares distances to the camera for equality.
     fn eq(&self, other: &Self) -> bool {
         let delta_a = delta(self.position, self.camera.position);
@@ -212,7 +216,7 @@ impl<'a> PartialEq for RenderData<'a> {
     }
 }
 
-impl<'a> PartialOrd for RenderData<'a> {
+impl PartialOrd for RenderData {
     /// Compares distances to the camera for ordering.
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let delta_a = delta(self.position, self.camera.position);
@@ -221,9 +225,9 @@ impl<'a> PartialOrd for RenderData<'a> {
     }
 }
 
-impl<'a> Eq for RenderData<'a> {}
+impl Eq for RenderData {}
 
-impl<'a> Ord for RenderData<'a> {
+impl Ord for RenderData {
     /// Fully orders entities by distance to the camera.
     fn cmp(&self, other: &Self) -> Ordering {
         let delta_a = delta(self.position, self.camera.position);
