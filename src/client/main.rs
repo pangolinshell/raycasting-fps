@@ -39,6 +39,7 @@ fn main() -> Result<(),Box<dyn Error>> {
     let mut socket = UdpSocket::bind(format!("0.0.0.0:0"))?;
     socket.set_read_timeout(Some(Duration::from_secs(5)))?;
     let (player_data,others_data,map_loader) = connection(&mut socket, server, args.nickname)?;
+    socket.set_read_timeout(Some(Duration::from_secs(0)))?;
 
 
     let sdl = sdl2::init()?;
@@ -63,7 +64,7 @@ fn main() -> Result<(),Box<dyn Error>> {
             1 => break,
             _ => (),
         }
-
+        
         frame_ctrl.end_frame();
     }
     disconnection(&mut socket, server)?;

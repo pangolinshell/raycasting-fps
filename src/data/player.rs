@@ -24,6 +24,7 @@ pub struct PlayerData {
 
     /// Current status (Alive, Disconnected, etc.).
     pub status: Status,
+    
 }
 
 impl PlayerData {

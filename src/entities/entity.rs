@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use sdl2::{rect::FPoint, render::Texture};
 
-use crate::{entities::{render_data::RenderData}, world::Map,camera::Camera};
+use crate::{camera::Camera, entities::render_data::RenderData, world::Map, TextureManager};
 
 
 pub trait Movable {
@@ -28,9 +28,9 @@ pub trait Movable {
 pub trait Entity<'a>: Movable {
     fn entity_type(&self) -> EntityType;
 
-    fn texture(&self) -> Rc<Texture<'a>>;
+    fn texture(&self) -> String;
     fn update(&mut self,ctx: Option<&mut Context>) -> Result<(),String>;
-    fn into_render(&self, camera: Camera, map: &Map) -> RenderData<'a> {
+    fn into_render<T>(&self, camera: Camera, map: &Map) -> RenderData {
         RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture())
     }
     fn into_placement_data(&self) -> PlacementData {

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub enum Status {
     Connecting,
     Alive,
+    Disconnecting,
     Dead(u64),
 }
 

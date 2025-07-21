@@ -1,6 +1,6 @@
 use std::net::UdpSocket;
 
-use crate::{data::{Deny, PlayerData, PlayersData, Update}, Loader};
+use crate::{data::{Deny, Update}, entities::{Player, Players}, Loader};
 pub use serde::{Deserialize,Serialize};
 
 #[derive(Deserialize,Serialize, Debug)]
@@ -8,16 +8,16 @@ pub use serde::{Deserialize,Serialize};
 pub enum OutputData {
     Update(Update),
     AccessDeny(Deny),
-    Connecting((PlayerData,PlayersData,Loader)),
-    New(PlayerData),
+    Connecting((Player,Players,Loader)),
+    New(Player),
     Unknown,
     None,
 }
 
 impl OutputData {
     pub fn parse(socket: &UdpSocket) -> Result<Self, Box<std::io::Error>> {
-        // init a buffer of 1024 bytes
-        let mut buf = [0; 4048];
+        // init a buffer of 4096 bytes
+        let mut buf = [0; 4096];
 
         // data reception (non-blocking)
         let opts = match socket.recv_from(&mut buf) {

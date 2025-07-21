@@ -1,36 +1,75 @@
-use std::rc::Rc;
+use std::{net::SocketAddr, ops::Deref, str::FromStr};
 
-use sdl2::render::Texture;
+use crate::{data::{default_addr, Status, Update}, entities::{entity::Movable, Entity}};
+use serde::{Deserialize,Serialize};
 
-use crate::{data::{PlayerData, PlayersData, Update}, entities::{entity::Movable, Entity}};
+#[derive(Debug, Clone,Serialize,Deserialize)]
+pub struct Player {
+    // IP address and port of the Player.
+    #[serde(skip, default = "default_addr")]
+    pub addr: SocketAddr,
 
-pub struct Player<'a> {
-    pub data: PlayerData,
+    /// Player's nickname or identifier.
+    pub nickname: String, // Nicknames are uniques
 
-    pub texture: Rc<Texture<'a>>
+    /// X coordinate of the Player's position.
+    pub x: f32,
+
+    /// Y coordinate of the Player's position.
+    pub y: f32,
+
+    /// Direction (angle or heading) of the Player.
+    pub d: f32,
+
+    /// Current status (Alive, Disconnected, etc.).
+    pub status: Status,
+    // pub data: PlayerData,
+    // pub texture: Rc<Texture>
+
+    pub texture: String,
 }
 
-impl<'a> Player<'a> {
-    pub fn new(player_data: PlayerData,texture: Rc<Texture<'a>>) -> Self {
-        Self { data: player_data, texture: texture.clone() }
+impl Player {
+    pub fn new<D: AsRef<str>>(name: String,xyd: (f32,f32,f32),texture: D) -> Self {
+        Self { addr:default_addr(), nickname: name, x: xyd.0, y: xyd.1, d: xyd.2, status: Status::Alive, texture: texture.as_ref().to_string() }
     }
 
-    pub fn update(&mut self,data: Update) -> u8 {
-        self.data.update(data)
+    pub fn update(&mut self, data: Update) -> u8 {
+        let mut modif_datas: u8 = 0;
+
+        if let Some(x) = data.x {
+            self.x = x;
+            modif_datas += 1;
+        }
+        if let Some(y) = data.y {
+            self.y = y;
+            modif_datas += 1;
+        }
+        if let Some(d) = data.d {
+            self.d = d;
+            modif_datas += 1;
+        }
+        if let Some(status) = data.status {
+            self.status = status;
+            modif_datas += 1;
+        }
+
+        modif_datas
     }
 }
 
-impl<'a> Movable for Player<'a> {
+impl Movable for Player {
     fn direction(&self) -> f32 {
-        self.data.d
+        self.d
     }
 
     fn position(&self) -> (f32,f32) {
-        (self.data.x,self.data.y)
+        // (self.data.x,self.data.y)
+        (self.x,self.y)
     }
 }
 
-impl<'a> Entity<'a> for Player<'a> {
+impl<'a> Entity<'a> for Player {
     fn update(&mut self,ctx: Option<&mut super::Context>) -> Result<(),String> {
         Ok(())
     }
@@ -39,34 +78,103 @@ impl<'a> Entity<'a> for Player<'a> {
         super::entity::EntityType::Player
     }
 
-    fn texture(&self) -> std::rc::Rc<sdl2::render::Texture<'a>> {
+    fn texture(&self) -> String {
         self.texture.clone()
     }
 }
 
-pub struct Players<'a> {
-    pub players: Vec<Player<'a>>,
+#[derive(Debug, Clone,Serialize,Deserialize)]
+pub struct Players {
+    pub players: Vec<Player>,
 }
 
-impl<'a> Players<'a> {
+impl Deref for Players {
+    type Target = Vec<Player>;
+    fn deref(&self) -> &Self::Target {
+        &self.players
+    }
+}
+
+impl Players {
     pub fn new() -> Self {
         Self { players: Vec::new() }
     }
 
-    pub fn from(data_players: PlayersData,texture: Rc<Texture<'a>>) -> Self {
-        let mut players = Vec::new();
-        for player in data_players.players {
-            players.push(Player::new(player, texture.clone()));
-        }
-        Self { players: players }
-    }
+    // pub fn from(data_players: PlayersData,texture: Rc<Texture>) -> Self {
+    //     let mut players = Vec::new();
+    //     for player in data_players.players {
+    //         players.push(Player::new(player, texture.clone()));
+    //     }
+    //     Self { players: players }
+    // }
 
-    pub fn update(&mut self,data: Update) -> Option<u8> {
-        for p in self.players.iter_mut() {
-            if p.data.nickname == data.nickname {
-                return Some(p.data.update(data));
+    pub fn update(&mut self, data: Update) -> Option<u8> {
+        let index = self.players.iter().position(|p| p.nickname == data.nickname);
+
+        if let Some(index) = index {
+            match data.status {
+                Some(status) => {
+                    match status {
+                        crate::data::Status::Disconnecting => {
+                            self.players.remove(index);
+                            return None;
+                        },
+                        _ => (),
+                    };
+                },
+                None => (),
+            }
+            match self.players.get_mut(index) {
+                Some(p) => return Some(p.update(data)),
+                None => return None,
             }
         }
         None
+    }
+
+    pub fn get_by_nickname<D: AsRef<str>>(&self, value: &D) -> Option<usize> {
+        self.players.iter().position(|p| p.nickname == value.as_ref())
+    }
+    
+    pub fn get_by_addr<A: IntoAddr>(&self, value: &A) -> Option<usize> {
+        if let Ok(addr) = value.into_addr() {
+            self.players.iter().position(|p| p.addr == addr)
+        } else {
+            None
+        }
+    }
+
+    pub fn push(&mut self,player: Player) {
+        self.players.push(player);
+    }
+
+    pub fn len(&self) -> usize {
+        self.players.len()
+    }
+
+    pub fn remove(&mut self,index: usize) {
+        self.players.remove(index);
+    }
+}
+
+pub trait IntoAddr {
+    fn into_addr(&self) -> Result<SocketAddr, ()>;
+}
+
+impl IntoAddr for SocketAddr {
+    fn into_addr(&self) -> Result<SocketAddr, ()> {
+        Ok(*self)
+    }
+}
+
+impl IntoAddr for &str {
+    fn into_addr(&self) -> Result<SocketAddr, ()> {
+        SocketAddr::from_str(self).map_err(|_| ())
+    }
+}
+
+impl IntoAddr for String {
+    fn into_addr(&self) -> Result<SocketAddr, ()> {
+        SocketAddr::from_str(self).map_err(|_| ())
     }
 }

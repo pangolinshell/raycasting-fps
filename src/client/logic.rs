@@ -1,9 +1,9 @@
 use std::{net::{SocketAddr, UdpSocket}, time::Duration};
 
-use multiplayer_fps::{data::{self, default_addr, InputData, OutputData, PlayerData, PlayersData}, Loader};
+use multiplayer_fps::{data::{self, default_addr, InputData, OutputData}, entities::{Player, Players}, Loader};
 
 type Error = Box<dyn std::error::Error>;
-pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) -> Result<(PlayerData,PlayersData,Loader), Error> {
+pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) -> Result<(Player,Players,Loader), Error> {
     let data = InputData::Connection(data::Connection {addr: default_addr(),nickname});
     let serialized = serde_json::to_string(&data)?;
     socket.send_to(serialized.as_bytes(), server)?;
@@ -22,4 +22,23 @@ pub fn disconnection(socket: &mut UdpSocket,server: SocketAddr) -> Result<(),Err
     let serialized = serde_json::to_string(&data)?;
     socket.send_to(serialized.as_bytes(), server)?;
     Ok(())
+}
+
+pub fn update(socket: &mut UdpSocket,server: SocketAddr) -> Result<(),Error> {
+    Ok(())
+}
+
+pub fn from_server(socket: &mut UdpSocket,players: &mut Players) -> Result<(),Error> {
+    let data = OutputData::parse(&socket)?;
+    match data {
+        OutputData::Update(update) => {players.update(update);},
+        // OutputData::New(p) => 
+        _ => (),
+        
+    };
+    Ok(())
+}
+
+fn new_player(players: &mut Players,player: Players) {
+    
 }
