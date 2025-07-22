@@ -24,14 +24,14 @@ pub fn broadcast(
     players: &Players,
     data: String,
 ) -> std::io::Result<()> {
+    if players.len() <= 1 {
+        return Ok(());
+    }
     for addr in players.iter() {
-        // Skip sending the message back to the sender (if specified).
         match from {
             Some(current_host) => if current_host == addr.addr { continue; },
             None => {},
         }
-
-        // Send the data to the target address.
         socket.send_to(data.as_bytes(), addr.addr)?;
     }
     Ok(())
@@ -75,13 +75,14 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
     // TODO : add map modularity
     let addr = data.addr;
     // let new_host = PlayerData::init(data, (16.0,16.0,16.0));
-    let new_host = Player::new(data.nickname, (16.0,16.0,0.0), "guard");
+    let mut new_host = Player::new(data.nickname, (16.0,16.0,0.0), "guard");
+    new_host.addr = data.addr;
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;
     // Send new host data to all Players
     let hosts_without_new = players.clone();
     players.push(new_host.clone());
-    // broadcast(socket, Some(addr), players, serialized)?;
+    broadcast(socket, Some(addr), players, serialized)?;
 
     // Send other Players data to all other users
     let msg = OutputData::Connecting((new_host,hosts_without_new.clone(),loader));
@@ -100,8 +101,15 @@ pub fn update(players: &mut Players,data: Update,socket: &UdpSocket) -> Result<(
 
 pub fn disconnection(players: &mut Players, addr: SocketAddr) -> Result<(),Box<dyn Error>> {
     let index = match players.get_by_addr(&addr) {
-        Some((i)) => i,
-        None => return  Err(format!("the ip {} is not connected",addr).into()),
+        Some(i) => i,
+        None => {
+            let mut v = vec![];
+            for z in players.iter() {
+                v.push(z.addr);
+            }
+            dbg!(v);
+            return  Err(format!("the ip {} is not connected",addr).into())
+        }
     };
     players.remove(index);
     Ok(())
@@ -119,6 +127,7 @@ loop {
             println!("{:?}: connection", addr);
         },
         InputData::Update(data) => {
+            // dbg!(format!("update from {}",&data.nickname));
             update(&mut players, data, &socket)?;
         },
         InputData::Disconnection {addr} => {

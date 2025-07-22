@@ -16,6 +16,13 @@ impl Camera {
         Self { position: (pos_x,pos_y), direction: dir, fov_factor: 0.5 }
     }
 
+    pub fn xyd(self) -> (f32,f32,f32) {
+        let x = self.position.0;
+        let y = self.position.1;
+        let d = self.direction;
+        (x,y,d)
+    }
+
     pub fn cast_rays//<'a,'l,T>
     (&self, map: Map, w: u32
         // tm: &TextureManager<'l,T>

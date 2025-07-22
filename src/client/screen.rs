@@ -1,6 +1,4 @@
-use sdl2::{render::Canvas, video::Window, EventPump, Sdl, VideoSubsystem};
-use std::rc::Rc;
-
+use sdl2::{ video::Window, Sdl};
 type Error = Box<dyn std::error::Error>;
 
 /// init and setup the window

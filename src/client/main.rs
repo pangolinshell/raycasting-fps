@@ -1,16 +1,19 @@
 mod args;
 use args::Args;
 use clap::Parser;
-use multiplayer_fps::{camera::Camera, frames::FramesCtrl, resources::TextureManager, world::Map};
+use multiplayer_fps::{camera::Camera, display::Display, frames::FramesCtrl, resources::TextureManager, world::Map};
 
 mod logic;
 mod screen;
+mod connection;
+use connection::connection;
 
-use std::{error::Error, net::{SocketAddr, UdpSocket}, time::Duration};
-use sdl2::{event::Event, EventPump};
+
+use std::{error::Error, net::{SocketAddr, UdpSocket}, sync::mpsc::TryRecvError, time::Duration};
+use sdl2::{event::Event, pixels::Color, EventPump};
 use sdl2::keyboard::Keycode;
 
-use crate::{logic::{connection, disconnection}, screen::window_init};
+use crate::{logic::{disconnection, on_connection, update}, screen::window_init};
 
 const WIN_TITLE: &str = "multiplayer fps";
 const SCREEN_WIDTH: u32 = 1280;
@@ -36,16 +39,17 @@ fn event(e:&mut EventPump) -> u32{
 fn main() -> Result<(),Box<dyn Error>> {
     let args = Args::parse();
     let server: SocketAddr = format!("{}:{}",args.host,args.port).parse()?;
-    let mut socket = UdpSocket::bind(format!("0.0.0.0:0"))?;
-    socket.set_read_timeout(Some(Duration::from_secs(5)))?;
-    let (player_data,others_data,map_loader) = connection(&mut socket, server, args.nickname)?;
-    socket.set_read_timeout(Some(Duration::from_secs(0)))?;
-
+    // let mut socket = UdpSocket::bind(format!("0.0.0.0:0"))?;
+    // socket.set_read_timeout(Some(Duration::from_secs(5)))?;
+    // let (player,others,map_loader) = connection(&mut socket, server, args.nickname)?;
+    let (tx,rx) = connection(server,args.nickname,Some(Duration::from_secs(40)))?;
+    let (player,mut others,map_loader) = on_connection(&rx)?;
+    let nickname = player.nickname;
 
     let sdl = sdl2::init()?;
     let mut event_pump = sdl.event_pump()?;
     let window = window_init(WIN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, sdl)?;
-    let canvas = window.into_canvas().accelerated().build()?;
+    let mut canvas = window.into_canvas().accelerated().build()?;
     let texture_creator = canvas.texture_creator();
 
     let mut texture_manager = TextureManager::new(&texture_creator);
@@ -55,18 +59,24 @@ fn main() -> Result<(),Box<dyn Error>> {
         .collect();
     texture_manager.load_from_map(textures_ref)?;
     let map = Map::from(map_loader);
-    let mut camera = Camera::new(player_data.x, player_data.y, player_data.d);
+    let mut camera = Camera::new(player.x, player.y, player.d);
     let mut frame_ctrl = FramesCtrl::init(TARGET_FPS);
     loop {
+        canvas.set_draw_color(Color::BLACK);
+        canvas.clear();
         frame_ctrl.start_frame();
         camera.inputs(&mut event_pump, frame_ctrl.dtime as f32);
         match event(&mut event_pump) {
             1 => break,
             _ => (),
         }
+        let mut rays = camera.cast_rays(map.clone(), SCREEN_WIDTH);
+        rays.display(&mut canvas, None::<multiplayer_fps::entities::Player>, Some(&texture_manager))?;
         
+        canvas.present();
+        update(&tx, &rx,camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();
     }
-    disconnection(&mut socket, server)?;
+    // disconnection(&mut socket, server)?;
     Ok(())
 }

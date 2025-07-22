@@ -2,6 +2,7 @@ use multiplayer_fps::resources::{ResourceManager,TextureManager};
 
 use sdl2::video::WindowContext;
 
+
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
