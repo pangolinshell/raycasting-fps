@@ -67,7 +67,8 @@
             "mossy": "mossy.png",
             "pillar":"pillar.png",
             "barrel":"barrel.png",
-            "placeholder":"placeholder.png"
+            "placeholder":"placeholder.png",
+            "goblin":"goblin.png"
         },
         "fonts": {
             "proggy_clean_NF_MonoRegular": {
