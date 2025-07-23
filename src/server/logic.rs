@@ -75,7 +75,7 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
     // TODO : add map modularity
     let addr = data.addr;
     // let new_host = PlayerData::init(data, (16.0,16.0,16.0));
-    let mut new_host = Player::new(data.nickname, (16.0,16.0,0.0), "guard");
+    let mut new_host = Player::new(data.nickname, (16.0,16.0,0.0), "goblin");
     new_host.addr = data.addr;
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;

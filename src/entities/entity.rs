@@ -30,7 +30,7 @@ pub trait Entity<'a>: Movable {
 
     fn texture(&self) -> String;
     fn update(&mut self,ctx: Option<&mut Context>) -> Result<(),String>;
-    fn into_render<T>(&self, camera: Camera, map: &Map) -> RenderData {
+    fn into_render(&self, camera: Camera, map: &Map) -> RenderData {
         RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture())
     }
     fn into_placement_data(&self) -> PlacementData {

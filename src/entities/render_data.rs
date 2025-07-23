@@ -56,7 +56,7 @@ impl RenderData {
     ///
     /// Performs coordinate transformation and draws the texture
     /// to the appropriate location and size on the SDL2 canvas.
-    pub fn display<T>(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture_manager: TextureManager<T>) -> Result<(),String> {
+    pub fn display<T>(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture_manager: &TextureManager<T>) -> Result<(),String> {
         if !self.is_visible(self.map.clone()) {
             return Ok(());
         }

@@ -56,24 +56,15 @@ pub fn disconnection(socket: &mut UdpSocket,server: SocketAddr) -> Result<(),Err
 pub fn update(tx: &Sender<InputData>,rx: &Receiver<OutputData>,camera: Camera,nickname: &str,others: &mut Players) -> Result<(),Error> {
     let data = InputData::Update(Update::new(default_addr(), nickname.to_string(), camera.xyd()));
     tx.send(data)?;
-    match rcv(rx)? {
-        Some(_) => (),
-        None => (),
-    }
-    Ok(())
-}
-
-pub fn from_server(socket: &mut UdpSocket,players: &mut Players) -> Result<(),Error> {
-    let data = OutputData::parse(&socket)?;
-    match data {
-        OutputData::Update(update) => {players.update(update);},
-        OutputData::New(p) => {
-            dbg!(&p);
-            players.push(p)
-        },
-        _ => (),
-        
+    let output = match rcv(rx)? {
+        Some(v) => v,
+        None => return Ok(()),
     };
+    match output {
+        OutputData::Update(data) => {others.update(data);},
+        OutputData::New(data) => others.push(data),
+        _ => (),
+    }
     Ok(())
 }
 
