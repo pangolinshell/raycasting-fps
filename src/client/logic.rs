@@ -1,6 +1,6 @@
 use std::{net::{SocketAddr, UdpSocket}, sync::mpsc::{Receiver, Sender, TryRecvError}, time::{Duration, Instant}};
 
-use multiplayer_fps::{camera::Camera, data::{self, default_addr, InputData, OutputData, Update}, entities::{Player, Players}, Loader};
+use multiplayer_fps::{camera::Camera, data::{default_addr, InputData, OutputData, Update}, entities::{Player, Players}, Loader};
 
 type Error = Box<dyn std::error::Error>;
 // pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) -> Result<(Player,Players,Loader), Error> {
@@ -45,7 +45,7 @@ pub fn on_connection(data: &Receiver<OutputData>) -> Result<(Player, Players, Lo
 }
 
 
-
+#[allow(unused)]
 pub fn disconnection(socket: &mut UdpSocket,server: SocketAddr) -> Result<(),Error> {
     let data = InputData::Disconnection { addr: default_addr() };
     let serialized = serde_json::to_string(&data)?;

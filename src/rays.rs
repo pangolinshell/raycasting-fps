@@ -1,6 +1,5 @@
-use std::{cell::RefCell,rc::Rc};
-use sdl2::{rect::Rect, render::{Canvas, Texture}, video::Window};
-use crate::{camera::Camera, display::Display, entities::Movable, resources::TextureManager, world::Map};
+use sdl2::{rect::Rect, render::{Canvas}, video::Window};
+use crate::{display::Display, entities::Movable, resources::TextureManager};
 
 #[derive(Clone)]
 pub struct Ray {

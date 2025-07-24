@@ -80,6 +80,7 @@ where
 // TextureCreator knows how to load Textures
 impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
     type Args = str;
+    #[allow(elided_named_lifetimes)]
     fn load(&'l self, path: &str) -> Result<Texture, String> {
         // println!("LOADED A TEXTURE");
         self.load_texture(path)

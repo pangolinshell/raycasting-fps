@@ -70,7 +70,7 @@ impl Movable for Player {
 }
 
 impl<'a> Entity<'a> for Player {
-    fn update(&mut self,ctx: Option<&mut super::Context>) -> Result<(),String> {
+    fn update(&mut self,_: Option<&mut super::Context>) -> Result<(),String> {
         Ok(())
     }
 

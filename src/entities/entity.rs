@@ -1,8 +1,6 @@
-use std::rc::Rc;
+use sdl2::{rect::FPoint};
 
-use sdl2::{rect::FPoint, render::Texture};
-
-use crate::{camera::Camera, entities::render_data::RenderData, world::Map, TextureManager};
+use crate::{camera::Camera, entities::render_data::RenderData, world::Map};
 
 
 pub trait Movable {

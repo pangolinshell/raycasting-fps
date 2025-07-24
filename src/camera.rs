@@ -2,7 +2,7 @@
 
 use sdl2::{keyboard::Scancode};
 
-use crate::{rays::{Ray, Rays}, resources::TextureManager, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
+use crate::{rays::{Ray, Rays}, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
 
 #[derive(Debug,Clone, Copy)]
 pub struct Camera {

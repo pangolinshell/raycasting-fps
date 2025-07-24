@@ -127,7 +127,6 @@ loop {
             println!("{:?}: connection", addr);
         },
         InputData::Update(data) => {
-            // dbg!(format!("update from {}",&data.nickname));
             update(&mut players, data, &socket)?;
         },
         InputData::Disconnection {addr} => {
@@ -136,7 +135,6 @@ loop {
         }
         InputData::None => (),
         InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
-        _ => eprintln!("not implemented yet"),
     }
 }
 }

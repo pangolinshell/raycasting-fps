@@ -1,4 +1,4 @@
-use std::{ net::{IpAddr, SocketAddr, UdpSocket}, sync::mpsc::{channel, Receiver, Sender, TryRecvError}, thread, time::Duration};
+use std::{ net::{SocketAddr, UdpSocket}, sync::mpsc::{channel, Receiver, Sender, TryRecvError}, thread, time::Duration};
 use multiplayer_fps::data::{default_addr, Connection, InputData, OutputData};
 
 type Error = Box<dyn std::error::Error>;

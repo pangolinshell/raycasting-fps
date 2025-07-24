@@ -9,11 +9,11 @@ mod connection;
 use connection::connection;
 
 
-use std::{error::Error, net::{SocketAddr, UdpSocket}, sync::mpsc::TryRecvError, time::Duration};
+use std::{error::Error, net::{SocketAddr}, time::Duration};
 use sdl2::{event::Event, pixels::Color, EventPump};
 use sdl2::keyboard::Keycode;
 
-use crate::{logic::{disconnection, on_connection, update}, screen::window_init};
+use crate::{logic::{on_connection, update}, screen::window_init};
 
 const WIN_TITLE: &str = "multiplayer fps";
 const SCREEN_WIDTH: u32 = 1280;
