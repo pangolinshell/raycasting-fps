@@ -57,7 +57,7 @@ impl Player {
         modif_datas
     }
 
-    pub fn shoot(&self, map: Map, players: Players, hit_radius: f32) -> Option<Player> {
+    pub fn shoot(&self, map: &Map, players: &Players, hit_radius: f32) -> Option<Player> {
         let (mut x, mut y) = self.position();
         let step = 0.1; // précision du rayon
         let dx = self.d.cos() * step;

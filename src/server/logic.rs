@@ -1,6 +1,6 @@
-use std::{error::Error, net::{SocketAddr, UdpSocket}};
+use std::{error::Error, net::{SocketAddr, UdpSocket}, time::Duration};
 
-use multiplayer_fps::{data::{Connection, Deny, InputData, OutputData, Update}, entities::{Player, Players}};
+use multiplayer_fps::{data::{Connection, Deny, InputData, OutputData, Status, Update}, entities::{Player, Players}, world::Map};
 use multiplayer_fps::Loader;
 
 use crate::args::Args;
@@ -93,6 +93,7 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
 
 // TODO : Add shooting verification
 pub fn update(players: &mut Players,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
+    players.update(data.clone());
     let msg = OutputData::Update(data.clone());
     let serialized = serde_json::to_string(&msg)?;
     broadcast(socket, Some(data.addr), players, serialized)?;
@@ -115,6 +116,30 @@ pub fn disconnection(players: &mut Players, addr: SocketAddr) -> Result<(),Box<d
     Ok(())
 }
 
+pub fn shoot(players: &mut Players,map: &Map,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>>  {
+    const HIT_RADIUS: f32 = 0.5; // ** A magic variable
+    const DEATH_TIMOUT: u64 = 30;
+
+    let p_index = match players.update(data.clone()) {
+        Some(v) => v,
+        None => return Err(format!("player \"{}\" does not exist", data.nickname).into())
+    };
+    let player = match players.get(p_index as usize) {
+        Some(v) => v,
+        None => return Err(format!("player \"{}\" does not exist", data.nickname).into())
+    };
+    match player.shoot(map, players, HIT_RADIUS) {
+        Some(target) => {
+            let data = Update { addr:target.addr, nickname: target.nickname.clone(), x: Some(target.x), y: Some(target.y), d: Some(target.d), status: Some(Status::Dead(DEATH_TIMOUT)) };
+            update(players, data, socket)?;
+            println!("{} has been shot",target.nickname);
+        }
+        None => {}
+    }
+    update(players, data, socket)?;
+    Ok(())
+}
+
 pub fn running(socket: UdpSocket,instance: &Args) -> Result<(),Box<dyn Error>>  {
 let mut players = Players::new();
 let map = Loader::from_file(&instance.map)?;
@@ -134,7 +159,6 @@ loop {
             println!("the player of addr : {} has been succesfully removed",addr)
         }
         InputData::Shoot(data) => {
-            
         }
         InputData::None => (),
         InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
