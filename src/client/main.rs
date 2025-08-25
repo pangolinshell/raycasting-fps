@@ -58,7 +58,7 @@ fn main() -> Result<(),Box<dyn Error>> {
         .map(|(k, v)| (k.as_str(), v.as_str()))
         .collect();
     texture_manager.load_from_map(textures_ref)?;
-    let map = Map::from(map_loader);
+    let map = Map::from(&map_loader);
     let mut camera = Camera::new(player.x, player.y, player.d);
     let mut frame_ctrl = FramesCtrl::init(TARGET_FPS);
     loop {

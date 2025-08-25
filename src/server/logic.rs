@@ -142,13 +142,14 @@ pub fn shoot(players: &mut Players,map: &Map,data: Update,socket: &UdpSocket) ->
 
 pub fn running(socket: UdpSocket,instance: &Args) -> Result<(),Box<dyn Error>>  {
 let mut players = Players::new();
-let map = Loader::from_file(&instance.map)?;
+let map_loader = Loader::from_file(&instance.map)?;
+let map = Map::from(&map_loader);
 loop {
     let data = InputData::parse(&socket)?;
     match data {
         InputData::Connection(data) => {
             let addr = data.addr;
-            connection(&mut players, data, &socket, instance.max_hosts,map.clone())?;
+            connection(&mut players, data, &socket, instance.max_hosts,map_loader.clone())?;
             println!("{:?}: connection", addr);
         },
         InputData::Update(data) => {
@@ -159,6 +160,7 @@ loop {
             println!("the player of addr : {} has been succesfully removed",addr)
         }
         InputData::Shoot(data) => {
+            shoot(&mut players,&map,data, &socket)?;
         }
         InputData::None => (),
         InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
