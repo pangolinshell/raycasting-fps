@@ -1,9 +1,3 @@
-// use sdl2::pixels::PixelFormatEnum;
-// use sdl2::render::Texture;
-// use sdl2::{image::LoadTexture, rect::Point, render::TextureCreator, video::WindowContext};
-// use crate::{error, Loader};
-// use std::rc::Rc;
-// use std::cell::RefCell;
 use std::collections::HashMap;
 
 use super::tiles::Tile;
@@ -13,61 +7,12 @@ pub struct Map {
     pub layout: Vec<Tile>,
     pub texture_map: HashMap<u8,String>,
     pub missing_texture: String,
-    // pub textures: HashMap<u8, Rc<RefCell<Texture<'a>>>>,
-    // pub missing: Rc<RefCell<Texture<'a>>>,
 }
 
 impl Map {
     pub fn new(layout: Vec<Tile>,t_map: HashMap<u8,String>,missing: String) -> Self {
         Self { layout, texture_map: t_map,missing_texture: missing }
     }
-    // pub fn from_bytes(u8_layout: Vec<Vec<u8>>, missing: Rc<RefCell<Texture<'a>>>) -> Self {
-    //     let mut layout: Vec<Tile> = Vec::new();
-    //     for (y,line) in u8_layout.iter().enumerate() {
-    //     for (x,tile)in line.iter().enumerate() {
-    //         let t = Tile::new(Point::new(x as i32, y as i32), *tile);
-    //         layout.push(t);
-    //     }
-    //     }
-    //     Self {
-    //         layout, 
-    //         // textures: HashMap::new(),
-    //         texture_map: HashMap::new(),
-    //         // missing
-    //     }
-    // }
-
-    // pub fn from_file(path: &str, texture_creator: &'a TextureCreator<WindowContext>) -> Result<Self, Box<dyn std::error::Error>> {
-    //     let level = super::loader::Level::from_file(path)?;
-    //     let dir = level.textures.directory;
-        
-    //     let mut missing = texture_creator
-    //     .create_texture_streaming(PixelFormatEnum::RGBA8888, 64, 64)
-    //     .expect("Erreur lors de la création de la texture");
-
-    //     missing
-    //         .with_lock(None, |buffer: &mut [u8], pitch: usize| {
-    //         for y in 0..64 {
-    //             for x in 0..64 {
-    //                 let offset = y * pitch + x * 4;
-    //                 buffer[offset] = 0;       // Rouge
-    //                 buffer[offset + 1] = 255; // Vert
-    //                 buffer[offset + 2] = 0;   // Bleu
-    //                 buffer[offset + 3] = 255; // Alpha
-    //             }
-    //         }
-    //     })
-    //     .expect("Erreur lors du lock de la texture");
-    //     let mut map = Map::from_bytes(level.layout,Rc::new(RefCell::new(missing)));
-    //     for (code, filename) in level.textures.tiles {
-    //         let texture = texture_creator.load_texture(format!("{}{}", dir, filename))?;
-    //         match map.textures.insert(code, Rc::new(RefCell::new(texture)).clone()) {
-    //             Some(_) => return Err(Box::new(error::Error::new(format!("code {} has been used at least twice please correct", code).as_str()))),
-    //             None => {},
-    //         };
-    //     };
-    //     Ok(map)
-    // }
 
     pub fn get_tile(&self,x: i32,y:i32) -> Option<Tile> {
         for t in self.layout.clone() {

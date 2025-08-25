@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, ops::Deref, str::FromStr};
 
-use crate::{data::{default_addr, Status, Update}, entities::{entity::Movable, Entity}};
+use crate::{data::{default_addr, Status, Update}, entities::{entity::Movable, Entity}, world::Map};
 use serde::{Deserialize,Serialize};
 
 #[derive(Debug, Clone,Serialize,Deserialize)]
@@ -55,6 +55,44 @@ impl Player {
         }
 
         modif_datas
+    }
+
+    pub fn shoot(&self, map: Map, players: Players, hit_radius: f32) -> Option<Player> {
+        let (mut x, mut y) = self.position();
+        let step = 0.1; // précision du rayon
+        let dx = self.d.cos() * step;
+        let dy = self.d.sin() * step;
+
+        loop {
+            // Avancer le rayon
+            x += dx;
+            y += dy;
+
+            // Vérifier collision avec mur
+            if let Some(true) = map.is_wall(x.floor() as i32, y.floor() as i32) {
+                return None;
+            }
+
+            // Vérifier joueurs
+            for player in players.iter() {
+                if player.nickname == self.nickname {
+                    continue; // on ignore le tireur
+                }
+
+                let px = player.x;
+                let py = player.y;
+                let dist2 = (px - x).powi(2) + (py - y).powi(2);
+
+                if dist2 <= hit_radius.powi(2) {
+                    return Some(player.clone());
+                }
+            }
+
+            // On fixe une distance max au rayon (évite boucle infinie si map vide)
+            if ((x - self.x).powi(2) + (y - self.y).powi(2)).sqrt() > 1000.0 {
+                return None;
+            }
+        }
     }
 }
 

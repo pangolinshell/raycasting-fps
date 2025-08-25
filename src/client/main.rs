@@ -85,6 +85,5 @@ fn main() -> Result<(),Box<dyn Error>> {
         update(&tx, &rx,camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();
     }
-    // disconnection(&mut socket, server)?;
     Ok(())
 }
