@@ -1,6 +1,6 @@
 use std::{net::UdpSocket, net::SocketAddr};
 
-use crate::data::{default_addr, Connection, Update};
+use crate::data::{default_addr, Connection, Shoot, Update};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize,Serialize, Debug)]
@@ -12,6 +12,7 @@ pub enum InputData {
         #[serde(skip,default = "default_addr")]
         addr: SocketAddr,
     },
+    Shoot(Shoot),
     Unknown, // Malformed request
     None, // nothing recieved
 }
