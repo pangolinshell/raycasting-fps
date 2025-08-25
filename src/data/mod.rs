@@ -22,3 +22,4 @@ mod output;
 pub use output::OutputData;
 
 mod shoot;
+pub use shoot::Shoot;
