@@ -133,6 +133,9 @@ loop {
             disconnection(&mut players, addr)?;
             println!("the player of addr : {} has been succesfully removed",addr)
         }
+        InputData::Shoot(data) => {
+            
+        }
         InputData::None => (),
         InputData::Unknown => eprintln!("malformed request :\n{:#?}",data),
     }
