@@ -1,4 +1,4 @@
-use std::{error::Error, net::{SocketAddr, UdpSocket}, time::Duration};
+use std::{error::Error, net::{SocketAddr, UdpSocket}};
 
 use multiplayer_fps::{data::{Connection, Deny, InputData, OutputData, Status, Update}, entities::{Player, Players}, world::Map};
 use multiplayer_fps::Loader;
