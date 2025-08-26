@@ -13,7 +13,7 @@ use std::{error::Error, net::{SocketAddr}, time::Duration};
 use sdl2::{event::Event, pixels::Color, EventPump};
 use sdl2::keyboard::Keycode;
 
-use crate::{logic::{on_connection, update}, screen::window_init};
+use crate::{logic::{on_connection, shoot, update}, screen::window_init};
 
 const WIN_TITLE: &str = "multiplayer fps";
 const SCREEN_WIDTH: u32 = 1280;
@@ -66,6 +66,9 @@ fn main() -> Result<(),Box<dyn Error>> {
         canvas.clear();
         frame_ctrl.start_frame();
         camera.inputs(&mut event_pump, frame_ctrl.dtime as f32);
+        if event_pump.keyboard_state().is_scancode_pressed(sdl2::keyboard::Scancode::Space) {
+            shoot(&tx, camera, &nickname)?;
+        }
         match event(&mut event_pump) {
             1 => break,
             _ => (),

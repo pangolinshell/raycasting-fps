@@ -120,13 +120,17 @@ pub fn shoot(players: &mut Players,map: &Map,data: Update,socket: &UdpSocket) ->
     const HIT_RADIUS: f32 = 0.5; // ** A magic variable
     const DEATH_TIMOUT: u64 = 30;
 
-    let p_index = match players.update(data.clone()) {
+    match players.update(data.clone()) {
         Some(v) => v,
         None => return Err(format!("player \"{}\" does not exist", data.nickname).into())
     };
-    let player = match players.get(p_index as usize) {
+    let p_index = match players.get_by_nickname(&data.nickname) {
         Some(v) => v,
         None => return Err(format!("player \"{}\" does not exist", data.nickname).into())
+    };
+    let player = match players.get(p_index) {
+        Some(p) => p,
+        None => return Err(format!("no player \"{}\" on index {}", data.nickname, p_index).into())
     };
     match player.shoot(map, players, HIT_RADIUS) {
         Some(target) => {

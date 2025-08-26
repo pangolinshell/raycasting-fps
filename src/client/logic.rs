@@ -53,6 +53,12 @@ pub fn disconnection(socket: &mut UdpSocket,server: SocketAddr) -> Result<(),Err
     Ok(())
 }
 
+pub fn shoot(tx: &Sender<InputData>,camera: Camera,nickname: &str) -> Result<(),Error> {
+    let data = InputData::Shoot(Update::new(default_addr(), nickname.to_string(), camera.xyd()));
+    tx.send(data)?;
+    Ok(())
+}
+
 pub fn update(tx: &Sender<InputData>,rx: &Receiver<OutputData>,camera: Camera,nickname: &str,others: &mut Players) -> Result<(),Error> {
     let data = InputData::Update(Update::new(default_addr(), nickname.to_string(), camera.xyd()));
     tx.send(data)?;
