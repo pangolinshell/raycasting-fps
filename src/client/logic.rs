@@ -57,6 +57,9 @@ pub fn update(tx: &Sender<InputData>,rx: &Receiver<OutputData>,camera: &mut Came
         OutputData::Update(data) => {
             if None == others.update(&data) {
                 if nickname == &data.nickname {
+                    println!("I am Dead");
+                    camera.update(&data);
+                    println!("{:#?}",data)
                 }
             }
         },

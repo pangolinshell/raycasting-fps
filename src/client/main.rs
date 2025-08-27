@@ -57,6 +57,7 @@ fn main() -> Result<(),Box<dyn Error>> {
     texture_manager.load_from_map(textures_ref)?;
     let map = Map::from(&map_loader);
     let mut camera = Camera::new(player.x, player.y, player.d);
+    let mut buff_cam_pos: (f32,f32) = camera.position;
     let mut frame_ctrl = FramesCtrl::init(TARGET_FPS);
     loop {
         canvas.set_draw_color(Color::BLACK);
@@ -80,7 +81,10 @@ fn main() -> Result<(),Box<dyn Error>> {
         for mut rd in render_datas {
             rd.display(&mut canvas, &texture_manager)?;
         }
-        
+        if camera.position != buff_cam_pos {
+            println!("x :{},y: {}",camera.position.0,camera.position.1);
+            buff_cam_pos = camera.position;
+        }
         canvas.present();
         update(&tx, &rx,&mut camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();

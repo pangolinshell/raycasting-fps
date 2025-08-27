@@ -141,12 +141,16 @@ pub fn shoot(players: &mut Players,map: &Map,data: Update,socket: &UdpSocket) ->
                 None =>  return Err(format!("no spawn point found").into()),
             };
             let data = Update { addr:target.addr, nickname: target.nickname.clone(), x: Some(spawn.pos.x as f32 + 0.5), y: Some(spawn.pos.y as f32 + 0.5), d: Some(target.d), status: Some(Status::Dead(DEATH_TIMOUT)) };
+            players.update(&data);
+            let msg = OutputData::Update(data.clone());
+            let serialized = serde_json::to_string(&msg)?;
+            socket.send_to(serialized.as_bytes(), target.addr)?;
             update(players, data, socket)?;
             println!("{} has been shot",target.nickname);
         }
         None => {}
     }
-    update(players, data, socket)?;
+    // update(players, data, socket)?;
     Ok(())
 }
 

@@ -33,10 +33,10 @@ impl Camera {
             self.position.1 = y;
             modif_datas += 1;
         }
-        if let Some(d) = data.d {
-            self.direction = d;
-            modif_datas += 1;
-        }
+        // if let Some(d) = data.d {
+        //     self.direction = d;
+        //     modif_datas += 1;
+        // }
         // if let Some(status) = data.status {
         //     self.status = status;
         //     modif_datas += 1;
