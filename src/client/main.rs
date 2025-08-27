@@ -9,7 +9,7 @@ mod connection;
 use connection::connection;
 
 
-use std::{error::Error, net::{SocketAddr}, time::Duration};
+use std::{error::Error, net::SocketAddr, time::{Duration, Instant}};
 use sdl2::{event::Event, pixels::Color, EventPump};
 use sdl2::keyboard::Keycode;
 
@@ -59,13 +59,15 @@ fn main() -> Result<(),Box<dyn Error>> {
     let mut camera = Camera::new(player.x, player.y, player.d);
     let mut buff_cam_pos: (f32,f32) = camera.position;
     let mut frame_ctrl = FramesCtrl::init(TARGET_FPS);
+    let mut shoot_cooldown = Instant::now();
     loop {
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
         frame_ctrl.start_frame();
         camera.inputs(&mut event_pump, frame_ctrl.dtime as f32);
-        if event_pump.keyboard_state().is_scancode_pressed(sdl2::keyboard::Scancode::Space) {
+        if event_pump.keyboard_state().is_scancode_pressed(sdl2::keyboard::Scancode::Space) && shoot_cooldown.elapsed() >= Duration::from_secs(1) {
             shoot(&tx, camera, &nickname)?;
+            shoot_cooldown = Instant::now();
         }
         match event(&mut event_pump) {
             1 => break,
