@@ -34,7 +34,7 @@ impl Player {
         Self { addr:default_addr(), nickname: name, x: xyd.0, y: xyd.1, d: xyd.2, status: Status::Alive, texture: texture.as_ref().to_string() }
     }
 
-    pub fn update(&mut self, data: Update) -> u8 {
+    pub fn update(&mut self, data: &Update) -> u8 {
         let mut modif_datas: u8 = 0;
 
         if let Some(x) = data.x {
@@ -146,7 +146,7 @@ impl Players {
     //     Self { players: players }
     // }
 
-    pub fn update(&mut self, data: Update) -> Option<u8> {
+    pub fn update(&mut self, data: &Update) -> Option<u8> {
         let index = self.players.iter().position(|p| p.nickname == data.nickname);
 
         if let Some(index) = index {

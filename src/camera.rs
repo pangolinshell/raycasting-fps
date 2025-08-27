@@ -2,7 +2,7 @@
 
 use sdl2::{keyboard::Scancode};
 
-use crate::{rays::{Ray, Rays}, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
+use crate::{data::Update, rays::{Ray, Rays}, utils::{angles::degrees_to_rad, vecs::from_direction}, world::Map};
 
 #[derive(Debug,Clone, Copy)]
 pub struct Camera {
@@ -23,6 +23,28 @@ impl Camera {
         (x,y,d)
     }
 
+    pub fn update(&mut self,data: &Update) -> u8 {
+        let mut modif_datas: u8 = 0;
+        if let Some(x) = data.x {
+            self.position.0 = x;
+            modif_datas += 1;
+        }
+        if let Some(y) = data.y {
+            self.position.1 = y;
+            modif_datas += 1;
+        }
+        if let Some(d) = data.d {
+            self.direction = d;
+            modif_datas += 1;
+        }
+        // if let Some(status) = data.status {
+        //     self.status = status;
+        //     modif_datas += 1;
+        // }
+
+        modif_datas
+    }
+ 
     pub fn cast_rays//<'a,'l,T>
     (&self, map: Map, w: u32
         // tm: &TextureManager<'l,T>

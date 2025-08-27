@@ -46,7 +46,7 @@ pub fn shoot(tx: &Sender<InputData>,camera: Camera,nickname: &str) -> Result<(),
     Ok(())
 }
 
-pub fn update(tx: &Sender<InputData>,rx: &Receiver<OutputData>,camera: Camera,nickname: &str,others: &mut Players) -> Result<(),Error> {
+pub fn update(tx: &Sender<InputData>,rx: &Receiver<OutputData>,camera: &mut Camera,nickname: &str,others: &mut Players) -> Result<(),Error> {
     let data = InputData::Update(Update::new(default_addr(), nickname.to_string(), camera.xyd()));
     tx.send(data)?;
     let output = match rcv(rx)? {
@@ -54,7 +54,12 @@ pub fn update(tx: &Sender<InputData>,rx: &Receiver<OutputData>,camera: Camera,ni
         None => return Ok(()),
     };
     match output {
-        OutputData::Update(data) => {others.update(data);},
+        OutputData::Update(data) => {
+            if None == others.update(&data) {
+                if nickname == &data.nickname {
+                }
+            }
+        },
         OutputData::New(data) => others.push(data),
         _ => (),
     }

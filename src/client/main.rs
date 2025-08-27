@@ -82,7 +82,7 @@ fn main() -> Result<(),Box<dyn Error>> {
         }
         
         canvas.present();
-        update(&tx, &rx,camera, &nickname,&mut others)?;
+        update(&tx, &rx,&mut camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();
     }
     Ok(())

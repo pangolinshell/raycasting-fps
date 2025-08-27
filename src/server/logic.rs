@@ -2,6 +2,7 @@ use std::{error::Error, net::{SocketAddr, UdpSocket}};
 
 use multiplayer_fps::{data::{Connection, Deny, InputData, OutputData, Status, Update}, entities::{Player, Players}, world::Map};
 use multiplayer_fps::Loader;
+use rand::prelude::*;
 
 use crate::args::Args;
 
@@ -93,7 +94,7 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
 
 // TODO : Add shooting verification
 pub fn update(players: &mut Players,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>> {
-    players.update(data.clone());
+    players.update(&data);
     let msg = OutputData::Update(data.clone());
     let serialized = serde_json::to_string(&msg)?;
     broadcast(socket, Some(data.addr), players, serialized)?;
@@ -118,9 +119,9 @@ pub fn disconnection(players: &mut Players, addr: SocketAddr) -> Result<(),Box<d
 
 pub fn shoot(players: &mut Players,map: &Map,data: Update,socket: &UdpSocket) -> Result<(),Box<dyn Error>>  {
     const HIT_RADIUS: f32 = 0.5; // ** A magic variable
-    const DEATH_TIMOUT: u64 = 30;
+    const DEATH_TIMOUT: u64 = 0;
 
-    match players.update(data.clone()) {
+    match players.update(&data) {
         Some(v) => v,
         None => return Err(format!("player \"{}\" does not exist", data.nickname).into())
     };
@@ -134,7 +135,12 @@ pub fn shoot(players: &mut Players,map: &Map,data: Update,socket: &UdpSocket) ->
     };
     match player.shoot(map, players, HIT_RADIUS) {
         Some(target) => {
-            let data = Update { addr:target.addr, nickname: target.nickname.clone(), x: Some(target.x), y: Some(target.y), d: Some(target.d), status: Some(Status::Dead(DEATH_TIMOUT)) };
+            let mut rng = rand::rng();
+            let spawn = match map.spawn_points.choose(&mut rng) {
+                Some(s) => s,
+                None =>  return Err(format!("no spawn point found").into()),
+            };
+            let data = Update { addr:target.addr, nickname: target.nickname.clone(), x: Some(spawn.pos.x as f32 + 0.5), y: Some(spawn.pos.y as f32 + 0.5), d: Some(target.d), status: Some(Status::Dead(DEATH_TIMOUT)) };
             update(players, data, socket)?;
             println!("{} has been shot",target.nickname);
         }
