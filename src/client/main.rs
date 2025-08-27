@@ -39,7 +39,7 @@ fn event(e:&mut EventPump) -> u32{
 fn main() -> Result<(),Box<dyn Error>> {
     let args = Args::parse();
     let server: SocketAddr = format!("{}:{}",args.host,args.port).parse()?;
-    let (tx,rx) = connection(server,args.nickname,Some(Duration::from_secs(40)))?;
+    let (tx,rx,udp_thread) = connection(server,args.nickname,Some(Duration::from_secs(40)))?;
     let (player,mut others,map_loader) = on_connection(&rx)?;
     let nickname = player.nickname;
 
@@ -91,5 +91,6 @@ fn main() -> Result<(),Box<dyn Error>> {
         update(&tx, &rx,&mut camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();
     }
+    udp_thread.kill();
     Ok(())
 }
