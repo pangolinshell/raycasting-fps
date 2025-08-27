@@ -10,14 +10,14 @@ use connection::connection;
 
 
 use std::{error::Error, net::SocketAddr, time::{Duration, Instant}};
-use sdl2::{event::Event, pixels::Color, EventPump};
+use sdl2::{EventPump, event::Event, pixels::Color, rect::Rect};
 use sdl2::keyboard::Keycode;
 
 use crate::{logic::{on_connection, shoot, update}, screen::window_init};
 
 const WIN_TITLE: &str = "multiplayer fps";
 const SCREEN_WIDTH: u32 = 1280;
-const SCREEN_HEIGHT: u32 = 1024;
+const SCREEN_HEIGHT: u32 = 1024 + 256;
 
 const TARGET_FPS: u32 = 60;
 
@@ -37,6 +37,12 @@ fn event(e:&mut EventPump) -> u32{
 
 
 fn main() -> Result<(),Box<dyn Error>> {
+
+    let all_screen = Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    let render_zone = Rect::new(0, 0, 1280, 1024);
+    let minimap_zone = Rect::new(0, 1025, 256, 256);
+    let interface_zone = Rect::new(257, 1025, SCREEN_WIDTH - 256, 256);
+
     let args = Args::parse();
     let server: SocketAddr = format!("{}:{}",args.host,args.port).parse()?;
     let (tx,rx,udp_thread) = connection(server,args.nickname,Some(Duration::from_secs(40)))?;
@@ -61,8 +67,10 @@ fn main() -> Result<(),Box<dyn Error>> {
     let mut frame_ctrl = FramesCtrl::init(TARGET_FPS);
     let mut shoot_cooldown = Instant::now();
     loop {
+        canvas.set_viewport(all_screen);
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
+        canvas.set_viewport(render_zone);
         frame_ctrl.start_frame();
         camera.inputs(&mut event_pump, frame_ctrl.dtime as f32);
         if event_pump.keyboard_state().is_scancode_pressed(sdl2::keyboard::Scancode::Space) && shoot_cooldown.elapsed() >= Duration::from_secs(1) {
@@ -84,9 +92,11 @@ fn main() -> Result<(),Box<dyn Error>> {
             rd.display(&mut canvas, &texture_manager)?;
         }
         if camera.position != buff_cam_pos {
-            println!("x :{},y: {}",camera.position.0,camera.position.1);
             buff_cam_pos = camera.position;
         }
+        canvas.set_viewport(interface_zone);
+        canvas.set_draw_color(Color::CYAN);
+        canvas.fill_rect(Rect::new(0, 0, 1280, 1000))?;
         canvas.present();
         update(&tx, &rx,&mut camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();
