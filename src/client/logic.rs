@@ -3,19 +3,6 @@ use std::{net::{SocketAddr, UdpSocket}, sync::mpsc::{Receiver, Sender, TryRecvEr
 use multiplayer_fps::{camera::Camera, data::{default_addr, InputData, OutputData, Update}, entities::{Player, Players}, Loader};
 
 type Error = Box<dyn std::error::Error>;
-// pub fn connection(socket: &mut UdpSocket,server: SocketAddr,nickname: String) -> Result<(Player,Players,Loader), Error> {
-//     let data = InputData::Connection(data::Connection {addr: default_addr(),nickname});
-//     let serialized = serde_json::to_string(&data)?;
-//     socket.send_to(serialized.as_bytes(), server)?;
-//     socket.set_read_timeout(Some(Duration::from_secs(10)))?;
-//     let data = OutputData::parse(socket)?;
-//     let (player,others,map) = match data {
-//         OutputData::Connecting(v) => v,
-//         OutputData::None => return Err("No response received from server within the timeout.".into()),
-//         _ =>return Err(format!("Unexpected response type: {:?}", data).into()),
-//     };
-//     Ok((player,others,map))
-// }
 
 pub fn on_connection(data: &Receiver<OutputData>) -> Result<(Player, Players, Loader), Error> {
     let timeout = Duration::from_secs(20);

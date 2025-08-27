@@ -158,6 +158,15 @@ impl<'a> From<&'a Fonts> for FontDetails {
                 layout.push(Tile::new(Point::new(x as i32, y as i32), *value));
             } 
         }
-        Map::new(layout, t_map, value.placeholder.clone())
+        let mut spawn_points = Vec::new();
+        for spawn_point in &value.spawnpoints {
+            match layout.iter().find(|t| {
+                (spawn_point.x as i32,spawn_point.y as i32) == (t.pos.x,t.pos.y)
+            }) {
+                Some(t) => spawn_points.push(*t), 
+                None => (),
+            }
+        }
+        Map::new(layout, t_map, value.placeholder.clone(),spawn_points)
     }
- }
+}

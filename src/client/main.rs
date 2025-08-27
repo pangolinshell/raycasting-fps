@@ -39,9 +39,6 @@ fn event(e:&mut EventPump) -> u32{
 fn main() -> Result<(),Box<dyn Error>> {
     let args = Args::parse();
     let server: SocketAddr = format!("{}:{}",args.host,args.port).parse()?;
-    // let mut socket = UdpSocket::bind(format!("0.0.0.0:0"))?;
-    // socket.set_read_timeout(Some(Duration::from_secs(5)))?;
-    // let (player,others,map_loader) = connection(&mut socket, server, args.nickname)?;
     let (tx,rx) = connection(server,args.nickname,Some(Duration::from_secs(40)))?;
     let (player,mut others,map_loader) = on_connection(&rx)?;
     let nickname = player.nickname;
