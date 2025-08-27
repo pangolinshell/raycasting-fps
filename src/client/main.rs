@@ -82,7 +82,7 @@ fn main() -> Result<(),Box<dyn Error>> {
             _ => (),
         }
         let mut rays = camera.cast_rays(map.clone(), SCREEN_WIDTH);
-        rays.display(&mut canvas, None::<multiplayer_fps::entities::Player>, Some(&texture_manager))?;
+        rays.display(&mut canvas, Some(&texture_manager))?;
         let mut render_datas = vec![];
         for other in others.iter() {
             render_datas.push(other.into_render(camera, &map));

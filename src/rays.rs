@@ -49,9 +49,7 @@ impl Rays {
 
 impl Display for Rays{
     #[allow(unused)]
-    fn display<'l, M, T>(&mut self, canvas: &mut Canvas<Window>, from: Option<M>, textures: Option<&TextureManager<'l, T>>) -> Result<(), String>
-    where
-        M: Movable,
+    fn display<'l, T>(&mut self, canvas: &mut Canvas<Window>, textures: Option<&TextureManager<'l, T>>) -> Result<(), String>
     {
         let textures = match textures {
             Some(v) => v,
