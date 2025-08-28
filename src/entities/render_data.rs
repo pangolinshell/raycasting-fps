@@ -27,6 +27,8 @@ use crate::camera::Camera;
 /// # Traits
 /// Implements `PartialEq`, `PartialOrd`, `Eq`, and `Ord` to allow sorting
 /// entities by distance (useful for painter's algorithm).
+#[derive(Clone)]
+#[allow(unused)]
 pub struct RenderData {
     /// The Camera's viewpoint (position, direction, FOV)
     camera: Camera,
@@ -35,7 +37,7 @@ pub struct RenderData {
     /// The entity's position in the world
     position: (f32,f32),
     /// The direction the entity is facing (unused)
-    _direction: f32,
+    direction: f32,
     /// The texture used to draw the entity
     texture: String
 }
@@ -47,7 +49,7 @@ impl RenderData {
             camera,
             map: map.clone(),
             position: (position.x, position.y),
-            _direction: direction,
+            direction: direction,
             texture
         }
     }
