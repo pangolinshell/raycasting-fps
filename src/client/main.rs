@@ -1,7 +1,7 @@
 mod args;
 use args::Args;
 use clap::Parser;
-use multiplayer_fps::{camera::Camera, display::Display, entities::Entity, frames::FramesCtrl, resources::TextureManager, world::Map};
+use multiplayer_fps::{camera::Camera, display::Display, entities::Entity, frames::FramesCtrl, resources::TextureManager, world::{Map, Minimap}};
 
 mod logic;
 mod screen;
@@ -10,7 +10,7 @@ use connection::connection;
 
 
 use std::{error::Error, net::SocketAddr, time::{Duration, Instant}};
-use sdl2::{EventPump, event::Event, pixels::Color, rect::Rect};
+use sdl2::{EventPump, event::Event, pixels::Color, rect::{FPoint, Rect}};
 use sdl2::keyboard::Keycode;
 
 use crate::{logic::{on_connection, shoot, update}, screen::window_init};
@@ -97,6 +97,13 @@ fn main() -> Result<(),Box<dyn Error>> {
         canvas.set_viewport(interface_zone);
         canvas.set_draw_color(Color::CYAN);
         canvas.fill_rect(Rect::new(0, 0, 1280, 1000))?;
+
+        canvas.set_viewport(minimap_zone);
+        let mut minimap = Minimap::new(&map, &FPoint::new(camera.position.0, camera.position.1), Color::GRAY, Color::BLACK);
+        minimap.set_target_pinpoint(Some(Color::YELLOW));
+        minimap.display::<()>(&mut canvas, None)?;
+
+        canvas.set_viewport(all_screen);
         canvas.present();
         update(&tx, &rx,&mut camera, &nickname,&mut others)?;
         frame_ctrl.end_frame();

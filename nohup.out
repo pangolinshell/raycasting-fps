@@ -2,3 +2,8 @@
 [0.067] Ignoring unknown config key: enable_powerline_glyphs
 [0.068] Ignoring unknown config key: enable_powerline_glyphs
 [0.059] Ignoring unknown config key: enable_powerline_glyphs
+[8346.133] [glfw error 65544]: Wayland: fatal display error: Broken pipe
+[8348.329] [glfw error 65544]: Wayland: fatal display error: Broken pipe
+[8353.844] [glfw error 65544]: Wayland: fatal display error: Broken pipe
+[0.142] Ignoring unknown config key: enable_powerline_glyphs
+[0.126] Ignoring unknown config key: enable_powerline_glyphs

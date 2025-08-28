@@ -1,6 +1,6 @@
 use sdl2::{render::Canvas, video::Window};
 
-use crate::{entities::Movable, resources::{TextureManager}};
+use crate::resources::{TextureManager};
 
 
 pub trait Display {
