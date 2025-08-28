@@ -30,19 +30,19 @@ pub struct Loader {
     textures_bindings: HashMap<u8, Name>,
 
     /// List of spawn points on the map.
-    spawnpoints: Vec<SpawnPoint>,
+    pub spawnpoints: Vec<SpawnPoint>,
 
     resources: Resources,
 }
 
 /// Represents a spawn point position on the map.
 #[derive(Debug, Deserialize, Serialize, Clone)]
-struct SpawnPoint {
+pub struct SpawnPoint {
     /// X coordinate in tile units.
-    x: u8,
+    pub x: u8,
 
     /// Y coordinate in tile units.
-    y: u8,
+    pub y: u8,
 }
 
 /// Structure holding paths to game resources like textures and fonts.

@@ -149,7 +149,12 @@ impl Camera {
         Rays::from(rays)
     }
 
-    pub fn inputs(&mut self,event_pump: &mut sdl2::EventPump,delta_time: f32) {
+    pub fn inputs(
+        &mut self,
+        event_pump: &mut sdl2::EventPump,
+        delta_time: f32,
+        map: &Map
+    ) {
         let keystate = event_pump.keyboard_state();
         let (px, py) = self.position;
         let speed = 6.0 * delta_time;
@@ -158,11 +163,11 @@ impl Camera {
         let dir_y = dir_angle.sin();
         let mut new_x = px;
         let mut new_y = py;
-        let fov_factor = 0.5; // tu peux jouer avec ça (0.5 à 1.0 typiquement)
+        let fov_factor = 0.5;
         let plane_x = -dir_y * fov_factor;
-        let plane_y =  dir_x * fov_factor;
-
-        // Avant / arrière = direction
+        let plane_y = dir_x * fov_factor;
+    
+        // Mouvement avant/arrière
         if keystate.is_scancode_pressed(Scancode::W) {
             new_x += dir_x * speed;
             new_y += dir_y * speed;
@@ -171,8 +176,8 @@ impl Camera {
             new_x -= dir_x * speed;
             new_y -= dir_y * speed;
         }
-
-        // Strafe droite / gauche = plan caméra
+    
+        // Strafe
         if keystate.is_scancode_pressed(Scancode::D) {
             new_x += plane_x * speed;
             new_y += plane_y * speed;
@@ -181,15 +186,26 @@ impl Camera {
             new_x -= plane_x * speed;
             new_y -= plane_y * speed;
         }
-
+    
+        // Rotation
         if keystate.is_scancode_pressed(Scancode::E) {
             self.direction += degrees_to_rad(1.0) * speed * 20.0;
         }
         if keystate.is_scancode_pressed(Scancode::Q) {
             self.direction -= degrees_to_rad(1.0) * speed * 20.0;
         }
-
-        self.position.0 = new_x;
-        self.position.1 = new_y;
+    
+        // --- Collision avec les murs ---
+        let tile_x = new_x.floor() as i32;
+        let tile_y = new_y.floor() as i32;
+    
+        if let Some(is_wall) = map.is_wall(tile_x, tile_y) {
+            if !is_wall {
+                self.position.0 = new_x;
+                self.position.1 = new_y;
+            }
+        }
     }
+
+
 }

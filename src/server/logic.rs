@@ -76,7 +76,12 @@ pub fn connection(players: &mut Players,data: Connection,socket: &UdpSocket,max_
     // TODO : add map modularity
     let addr = data.addr;
     // let new_host = PlayerData::init(data, (16.0,16.0,16.0));
-    let mut new_host = Player::new(data.nickname, (16.0,16.0,0.0), "goblin");
+    let mut rng = rand::rng();
+    let spawn = match loader.spawnpoints.choose(&mut rng) {
+        Some(v) => v,
+        None => return Err(format!("can't pick a spawnpoint on connection").into())
+    };
+    let mut new_host = Player::new(data.nickname, (spawn.x as f32 + 0.5,spawn.y as f32 + 0.5,0.0), "goblin");
     new_host.addr = data.addr;
     let msg = OutputData::New(new_host.clone());
     let serialized = serde_json::to_string(&msg)?;

@@ -1,6 +1,7 @@
 use std::{net::SocketAddr, ops::Deref, str::FromStr};
 
 use crate::{data::{default_addr, Status, Update}, entities::{entity::Movable, Entity}, world::Map};
+use sdl2::rect::FPoint;
 use serde::{Deserialize,Serialize};
 
 #[derive(Debug, Clone,Serialize,Deserialize)]
@@ -136,6 +137,11 @@ impl Deref for Players {
 impl Players {
     pub fn new() -> Self {
         Self { players: Vec::new() }
+    }
+
+    pub fn into_coordinates(&self) -> Vec<FPoint>{
+        let value = self.players.iter().map(|p| FPoint::new(p.x, p.y)).collect::<Vec<FPoint>>();
+        value
     }
 
     // pub fn from(data_players: PlayersData,texture: Rc<Texture>) -> Self {

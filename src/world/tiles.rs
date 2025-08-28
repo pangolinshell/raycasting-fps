@@ -1,6 +1,6 @@
 use sdl2::rect::Point;
 
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,Copy,Clone,PartialEq)]
 pub enum TileType {
     Void,
     Wall(u8),

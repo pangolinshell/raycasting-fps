@@ -72,7 +72,7 @@ fn main() -> Result<(),Box<dyn Error>> {
         canvas.clear();
         canvas.set_viewport(render_zone);
         frame_ctrl.start_frame();
-        camera.inputs(&mut event_pump, frame_ctrl.dtime as f32);
+        camera.inputs(&mut event_pump, frame_ctrl.dtime as f32,&map);
         if event_pump.keyboard_state().is_scancode_pressed(sdl2::keyboard::Scancode::Space) && shoot_cooldown.elapsed() >= Duration::from_secs(1) {
             shoot(&tx, camera, &nickname)?;
             shoot_cooldown = Instant::now();
@@ -100,6 +100,7 @@ fn main() -> Result<(),Box<dyn Error>> {
 
         canvas.set_viewport(minimap_zone);
         let mut minimap = Minimap::new(&map, &FPoint::new(camera.position.0, camera.position.1), Color::GRAY, Color::BLACK);
+        minimap.set_others(others.into_coordinates());
         minimap.set_target_pinpoint(Some(Color::YELLOW));
         minimap.display::<()>(&mut canvas, None)?;
 

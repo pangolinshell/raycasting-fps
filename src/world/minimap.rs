@@ -1,3 +1,5 @@
+use std::num::FpCategory;
+
 use sdl2::{pixels::Color, rect::FPoint};
 
 use crate::{ display};
@@ -14,12 +16,19 @@ pub struct Minimap {
 
     wall_color: Color,
     bg_color: Color,
-    target_color: Option<Color>
+    target_color: Option<Color>,
+
+    others_color: Color,
+    others: Vec<FPoint>
 }
 
 impl Minimap {
     pub fn new(map: &Map,target: &FPoint, wall_color: Color, bg_color: Color) -> Self {
-        Self { map: map.clone(), target: target.clone(), wall_size: DEFAULT_WALL_SIZE, wall_color: wall_color.clone(), bg_color: bg_color.clone(), target_color: None }
+        Self { map: map.clone(), target: target.clone(), wall_size: DEFAULT_WALL_SIZE, wall_color: wall_color.clone(), bg_color: bg_color.clone(), target_color: None,others:Vec::new(),others_color:Color::RED }
+    }
+
+    pub fn set_others(&mut self,vec: Vec<FPoint>) {
+        self.others = vec
     }
 
     pub fn set_target_pinpoint(&mut self,color: Option<Color>) {
