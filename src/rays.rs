@@ -1,5 +1,5 @@
 use sdl2::{rect::Rect, render::{Canvas}, video::Window};
-use crate::{display::Display, entities::Movable, resources::TextureManager};
+use crate::{display::Display, resources::TextureManager};
 
 #[derive(Clone)]
 pub struct Ray {

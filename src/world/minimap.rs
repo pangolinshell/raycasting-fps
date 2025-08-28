@@ -1,4 +1,4 @@
-use sdl2::{pixels::Color, rect::{FPoint, Point}};
+use sdl2::{pixels::Color, rect::FPoint};
 
 use crate::{ display};
 

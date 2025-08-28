@@ -1,8 +1,8 @@
 #![allow(unused,)]
 
-use std::rc::Rc;
+use std::{fmt::format, rc::Rc};
 use sdl2::{rect::{FPoint, Rect}, render::Texture};
-use crate::{utils::vecs::*, world::Map, TextureManager};
+use crate::{TextureManager, display::Display, rays::Rays, utils::vecs::*, world::Map};
 use std::cmp::Ordering;
 use crate::camera::Camera;
 
@@ -39,79 +39,22 @@ pub struct RenderData {
     /// The direction the entity is facing (unused)
     direction: f32,
     /// The texture used to draw the entity
-    texture: String
+    texture: String,
+
+    rays: Rays
 }
 
 impl RenderData {
     /// Creates a new `RenderData` instance
-    pub fn new(camera: Camera, map: Map, position: FPoint, direction: f32, texture: String) -> Self {
+    pub fn new(camera: Camera, map: Map, position: FPoint, direction: f32, texture: String,rays:Rays) -> Self {
         Self {
             camera,
             map: map.clone(),
             position: (position.x, position.y),
             direction: direction,
-            texture
+            texture,
+            rays,
         }
-    }
-
-    /// Renders the entity to the screen if it is visible to the Camera.
-    ///
-    /// Performs coordinate transformation and draws the texture
-    /// to the appropriate location and size on the SDL2 canvas.
-    pub fn display<T>(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture_manager: &TextureManager<T>) -> Result<(),String> {
-        if !self.is_visible(self.map.clone()) {
-            return Ok(());
-        }
-
-        let v_rect = canvas.viewport();
-        let (screen_w, screen_h) = (v_rect.width(), v_rect.height());
-        let (px, py) = self.camera.position;
-        let (dx, dy) = from_direction(self.camera.direction);
-        let fov_factor = self.camera.fov_factor;
-
-        let (dir_x, dir_y) = from_direction(self.camera.direction);
-        let plane_x = -dir_y * fov_factor;
-        let plane_y =  dir_x * fov_factor;
-
-        // Relative position to camera
-        let sprite_x = self.position.0 - px;
-        let sprite_y = self.position.1 - py;
-
-        // Inverse camera transformation matrix
-        let inv_det = 1.0 / (plane_x * dy - dx * plane_y);
-        let transform_x = inv_det * (dy * sprite_x - dx * sprite_y);
-        let transform_y = inv_det * (-plane_y * sprite_x + plane_x * sprite_y);
-
-        if transform_y <= 0.0 {
-            return Ok(()); // Behind the camera
-        }
-
-        let sprite_screen_x = ((screen_w as f32 / 2.0) * (1.0 + transform_x / transform_y)) as i32;
-
-        let sprite_height = (screen_h as f32 / transform_y) as i32;
-        let draw_start_y = (-sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
-        let draw_end_y = (sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
-
-        let sprite_width = sprite_height; // Make it square
-        let draw_start_x = -sprite_width / 2 + sprite_screen_x;
-        let draw_end_x = sprite_width / 2 + sprite_screen_x;
-
-        let texture = self.texture.clone();
-        let src_rect = Rect::new(0, 0, 64, 64); // Fixed-size square texture
-
-        let dst_rect = Rect::new(
-            draw_start_x,
-            draw_start_y,
-            (draw_end_x - draw_start_x) as u32,
-            (draw_end_y - draw_start_y) as u32,
-        );
-        let texture = match texture_manager.get(&self.texture) {
-            Some(texture) => texture,
-            None => return Err(format!("texture \"{}\" not found",self.texture)),
-        };
-
-        canvas.copy(&*texture, src_rect, dst_rect)?;
-        Ok(())
     }
 
     /// Computes Euclidean distance from the entity to the given Camera.
@@ -235,5 +178,67 @@ impl Ord for RenderData {
         let delta_a = delta(self.position, self.camera.position);
         let delta_b = delta(other.position, self.camera.position);
         delta_a.partial_cmp(&delta_b).unwrap_or(Ordering::Equal)
+    }
+}
+
+impl Display for RenderData {
+    fn display<T>(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture_manager: Option<&TextureManager<T>>) -> Result<(),String> {
+        let texture_manager = match texture_manager {
+            Some(tm) => tm,
+            None => return Err(format!("texture manager can't be None in RenderData.display()").into()),
+        };
+        if !self.is_visible(self.map.clone()) {
+            return Ok(());
+        }
+
+        let v_rect = canvas.viewport();
+        let (screen_w, screen_h) = (v_rect.width(), v_rect.height());
+        let (px, py) = self.camera.position;
+        let (dx, dy) = from_direction(self.camera.direction);
+        let fov_factor = self.camera.fov_factor;
+
+        let (dir_x, dir_y) = from_direction(self.camera.direction);
+        let plane_x = -dir_y * fov_factor;
+        let plane_y =  dir_x * fov_factor;
+
+        // Relative position to camera
+        let sprite_x = self.position.0 - px;
+        let sprite_y = self.position.1 - py;
+
+        // Inverse camera transformation matrix
+        let inv_det = 1.0 / (plane_x * dy - dx * plane_y);
+        let transform_x = inv_det * (dy * sprite_x - dx * sprite_y);
+        let transform_y = inv_det * (-plane_y * sprite_x + plane_x * sprite_y);
+
+        if transform_y <= 0.0 {
+            return Ok(()); // Behind the camera
+        }
+
+        let sprite_screen_x = ((screen_w as f32 / 2.0) * (1.0 + transform_x / transform_y)) as i32;
+
+        let sprite_height = (screen_h as f32 / transform_y) as i32;
+        let draw_start_y = (-sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
+        let draw_end_y = (sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
+
+        let sprite_width = sprite_height; // Make it square
+        let draw_start_x = -sprite_width / 2 + sprite_screen_x;
+        let draw_end_x = sprite_width / 2 + sprite_screen_x;
+
+        let texture = self.texture.clone();
+        let src_rect = Rect::new(0, 0, 64, 64); // Fixed-size square texture
+
+        let dst_rect = Rect::new(
+            draw_start_x,
+            draw_start_y,
+            (draw_end_x - draw_start_x) as u32,
+            (draw_end_y - draw_start_y) as u32,
+        );
+        let texture = match texture_manager.get(&self.texture) {
+            Some(texture) => texture,
+            None => return Err(format!("texture \"{}\" not found",self.texture)),
+        };
+
+        canvas.copy(&*texture, src_rect, dst_rect)?;
+        Ok(())
     }
 }

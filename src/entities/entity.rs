@@ -1,6 +1,6 @@
 use sdl2::{rect::FPoint};
 
-use crate::{camera::Camera, entities::render_data::RenderData, world::Map};
+use crate::{camera::Camera, entities::render_data::RenderData, rays::Rays, world::Map};
 
 
 pub trait Movable {
@@ -28,8 +28,8 @@ pub trait Entity<'a>: Movable {
 
     fn texture(&self) -> String;
     fn update(&mut self,ctx: Option<&mut Context>) -> Result<(),String>;
-    fn into_render(&self, camera: Camera, map: &Map) -> RenderData {
-        RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture())
+    fn into_render(&self, camera: Camera, map: &Map,rays: &Rays) -> RenderData {
+        RenderData::new(camera, map.clone(), FPoint::from(self.position()), self.direction(), self.texture(),rays.clone())
     }
     fn into_placement_data(&self) -> PlacementData {
         PlacementData { position: self.position(), direction: self.direction(), entity_type: self.entity_type()}

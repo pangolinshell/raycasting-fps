@@ -85,11 +85,11 @@ fn main() -> Result<(),Box<dyn Error>> {
         rays.display(&mut canvas, Some(&texture_manager))?;
         let mut render_datas = vec![];
         for other in others.iter() {
-            render_datas.push(other.into_render(camera, &map));
+            render_datas.push(other.into_render(camera, &map,&rays));
         }
         render_datas.sort();
         for mut rd in render_datas {
-            rd.display(&mut canvas, &texture_manager)?;
+            rd.display(&mut canvas, Some(&texture_manager))?;
         }
         if camera.position != buff_cam_pos {
             buff_cam_pos = camera.position;
