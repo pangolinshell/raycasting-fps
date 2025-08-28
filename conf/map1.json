@@ -37,8 +37,8 @@
     "spawnpoints": [
         { "x": 1, "y": 1 },
         {"x": 1, "y": 22},
-        {"x":22,"y":22},
-        { "x": 20, "y": 20 }
+        {"x":22,"y":2},
+        { "x": 22, "y": 22 }
     ],
     "resources": {
         "textures_directory": "assets/img/",

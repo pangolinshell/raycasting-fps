@@ -1,7 +1,7 @@
 mod args;
 use args::Args;
 use clap::Parser;
-use multiplayer_fps::{camera::Camera, display::Display, entities::Entity, frames::FramesCtrl, resources::TextureManager, world::{Map, Minimap}};
+use multiplayer_fps::{FontDetails, FontManager, camera::Camera, display::Display, entities::Entity, frames::FramesCtrl, resources::TextureManager, world::{Map, Minimap}};
 
 mod logic;
 mod screen;
@@ -9,8 +9,8 @@ mod connection;
 use connection::connection;
 
 
-use std::{error::Error, net::SocketAddr, time::{Duration, Instant}};
-use sdl2::{EventPump, event::Event, pixels::Color, rect::{FPoint, Rect}};
+use std::{collections::HashMap, error::Error, net::SocketAddr, time::{Duration, Instant}};
+use sdl2::{EventPump, event::Event, pixels::Color, rect::{FPoint, Rect}, ttf::Sdl2TtfContext, video::Window};
 use sdl2::keyboard::Keycode;
 
 use crate::{logic::{on_connection, shoot, update}, screen::window_init};
@@ -35,6 +35,14 @@ fn event(e:&mut EventPump) -> u32{
     return 0;
 }
 
+// fn fps_display(canvas: &mut Canvas<Window>, fm: FontManager, fps: FramesCtrl) -> Result<(),Box<dyn Error>>{
+//     let font = match fm.get() {
+//         Some(f) => f,
+//         None => return Err(format!("font not found : \"{}\"","proggy_clean_NF_MonoRegular").into()),
+//     };
+//     // Use `font` as needed here
+//     Ok(())
+// }
 
 fn main() -> Result<(),Box<dyn Error>> {
 
@@ -54,6 +62,11 @@ fn main() -> Result<(),Box<dyn Error>> {
     let window = window_init(WIN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, sdl)?;
     let mut canvas = window.into_canvas().accelerated().build()?;
     let texture_creator = canvas.texture_creator();
+
+    // let ttf_loader = Sdl2TtfContext;
+    // let mut ttf_manager = FontManager::new(&ttf_loader);
+    // let fonts_map = map_loader.get_resources().fonts_map()?; // Use the correct method to get the fonts map
+    // ttf_manager.load_from_map(fonts_map)?;
 
     let mut texture_manager = TextureManager::new(&texture_creator);
     let textures = map_loader.get_resources().textures()?;
