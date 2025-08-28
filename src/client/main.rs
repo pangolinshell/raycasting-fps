@@ -1,7 +1,7 @@
 mod args;
 use args::Args;
 use clap::Parser;
-use multiplayer_fps::{FontDetails, FontManager, camera::Camera, display::Display, entities::Entity, frames::FramesCtrl, resources::TextureManager, world::{Map, Minimap}};
+use multiplayer_fps::{camera::Camera, display::Display, entities::Entity, frames::FramesCtrl, resources::TextureManager, world::{Map, Minimap}};
 
 mod logic;
 mod screen;
@@ -9,15 +9,16 @@ mod connection;
 use connection::connection;
 
 
-use std::{collections::HashMap, error::Error, net::SocketAddr, time::{Duration, Instant}};
-use sdl2::{EventPump, event::Event, pixels::Color, rect::{FPoint, Rect}, ttf::Sdl2TtfContext, video::Window};
+use std::{error::Error, net::SocketAddr, time::{Duration, Instant}};
+use sdl2::{EventPump, event::Event, pixels::Color, rect::{FPoint, Rect}};
 use sdl2::keyboard::Keycode;
 
 use crate::{logic::{on_connection, shoot, update}, screen::window_init};
 
 const WIN_TITLE: &str = "multiplayer fps";
-const SCREEN_WIDTH: u32 = 1280;
-const SCREEN_HEIGHT: u32 = 1024 + 256;
+const SCREEN_WIDTH: u32 = 1080;
+const SCREEN_HEIGHT: u32 = (SCREEN_WIDTH as f32 * 0.8) as u32;
+const HUD_HEIGHT: u32 = SCREEN_WIDTH - SCREEN_HEIGHT;
 
 const TARGET_FPS: u32 = 60;
 
@@ -35,21 +36,12 @@ fn event(e:&mut EventPump) -> u32{
     return 0;
 }
 
-// fn fps_display(canvas: &mut Canvas<Window>, fm: FontManager, fps: FramesCtrl) -> Result<(),Box<dyn Error>>{
-//     let font = match fm.get() {
-//         Some(f) => f,
-//         None => return Err(format!("font not found : \"{}\"","proggy_clean_NF_MonoRegular").into()),
-//     };
-//     // Use `font` as needed here
-//     Ok(())
-// }
-
 fn main() -> Result<(),Box<dyn Error>> {
 
-    let all_screen = Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    let render_zone = Rect::new(0, 0, 1280, 1024);
-    let minimap_zone = Rect::new(0, 1025, 256, 256);
-    let interface_zone = Rect::new(257, 1025, SCREEN_WIDTH - 256, 256);
+    let all_screen = Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT + HUD_HEIGHT);
+    let render_zone = Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    let minimap_zone = Rect::new(0, SCREEN_HEIGHT as i32 + 1 , HUD_HEIGHT, HUD_HEIGHT);
+    let interface_zone = Rect::new(HUD_HEIGHT as i32+ 1, SCREEN_HEIGHT as i32 + 1, SCREEN_WIDTH - HUD_HEIGHT, HUD_HEIGHT);
 
     let args = Args::parse();
     let server: SocketAddr = format!("{}:{}",args.host,args.port).parse()?;
@@ -59,14 +51,9 @@ fn main() -> Result<(),Box<dyn Error>> {
 
     let sdl = sdl2::init()?;
     let mut event_pump = sdl.event_pump()?;
-    let window = window_init(WIN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, sdl)?;
+    let window = window_init(WIN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT + HUD_HEIGHT, sdl)?;
     let mut canvas = window.into_canvas().accelerated().build()?;
     let texture_creator = canvas.texture_creator();
-
-    // let ttf_loader = Sdl2TtfContext;
-    // let mut ttf_manager = FontManager::new(&ttf_loader);
-    // let fonts_map = map_loader.get_resources().fonts_map()?; // Use the correct method to get the fonts map
-    // ttf_manager.load_from_map(fonts_map)?;
 
     let mut texture_manager = TextureManager::new(&texture_creator);
     let textures = map_loader.get_resources().textures()?;
