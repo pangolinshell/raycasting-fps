@@ -3,7 +3,7 @@ use crate::{display::Display, resources::TextureManager};
 
 #[derive(Clone)]
 pub struct Ray {
-    dist: f32,
+    pub dist: f32,
     ray_dir_x: f32,
     ray_dir_y: f32,
 
@@ -16,7 +16,7 @@ pub struct Ray {
 
 #[derive(Clone)]
 pub struct Rays{
-    rays: Vec<Ray>,
+    pub rays: Vec<Ray>,
 }
 
 impl Ray {

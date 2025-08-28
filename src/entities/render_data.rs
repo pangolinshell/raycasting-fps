@@ -182,15 +182,16 @@ impl Ord for RenderData {
 }
 
 impl Display for RenderData {
-    fn display<T>(&mut self ,canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,texture_manager: Option<&TextureManager<T>>) -> Result<(),String> {
+    fn display<T>(
+        &mut self,
+        canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
+        texture_manager: Option<&TextureManager<T>>,
+    ) -> Result<(), String> {
         let texture_manager = match texture_manager {
             Some(tm) => tm,
-            None => return Err(format!("texture manager can't be None in RenderData.display()").into()),
+            None => return Err(format!("must add some texutres")),
         };
-        if !self.is_visible(self.map.clone()) {
-            return Ok(());
-        }
-
+        // --- Projection caméra ---
         let v_rect = canvas.viewport();
         let (screen_w, screen_h) = (v_rect.width(), v_rect.height());
         let (px, py) = self.camera.position;
@@ -199,46 +200,61 @@ impl Display for RenderData {
 
         let (dir_x, dir_y) = from_direction(self.camera.direction);
         let plane_x = -dir_y * fov_factor;
-        let plane_y =  dir_x * fov_factor;
+        let plane_y = dir_x * fov_factor;
 
-        // Relative position to camera
+        // Position relative entité -> caméra
         let sprite_x = self.position.0 - px;
         let sprite_y = self.position.1 - py;
 
-        // Inverse camera transformation matrix
+        // Transformation caméra
         let inv_det = 1.0 / (plane_x * dy - dx * plane_y);
         let transform_x = inv_det * (dy * sprite_x - dx * sprite_y);
         let transform_y = inv_det * (-plane_y * sprite_x + plane_x * sprite_y);
 
         if transform_y <= 0.0 {
-            return Ok(()); // Behind the camera
+            return Ok(()); // derrière caméra
         }
 
-        let sprite_screen_x = ((screen_w as f32 / 2.0) * (1.0 + transform_x / transform_y)) as i32;
+        // Projection écran
+        let sprite_screen_x =
+            ((screen_w as f32 / 2.0) * (1.0 + transform_x / transform_y)) as i32;
 
         let sprite_height = (screen_h as f32 / transform_y) as i32;
-        let draw_start_y = (-sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
-        let draw_end_y = (sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
+        let draw_start_y =
+            (-sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
+        let draw_end_y =
+            (sprite_height / 2 + screen_h as i32 / 2).clamp(0, screen_h as i32 - 1);
 
-        let sprite_width = sprite_height; // Make it square
+        let sprite_width = sprite_height;
         let draw_start_x = -sprite_width / 2 + sprite_screen_x;
         let draw_end_x = sprite_width / 2 + sprite_screen_x;
 
-        let texture = self.texture.clone();
-        let src_rect = Rect::new(0, 0, 64, 64); // Fixed-size square texture
-
-        let dst_rect = Rect::new(
-            draw_start_x,
-            draw_start_y,
-            (draw_end_x - draw_start_x) as u32,
-            (draw_end_y - draw_start_y) as u32,
-        );
+        // Récup texture
         let texture = match texture_manager.get(&self.texture) {
             Some(texture) => texture,
-            None => return Err(format!("texture \"{}\" not found",self.texture)),
+            None => return Err(format!("texture \"{}\" not found", self.texture)),
         };
 
-        canvas.copy(&*texture, src_rect, dst_rect)?;
+        // --- Rendu colonne par colonne avec Rays comme z-buffer ---
+        for stripe in draw_start_x..draw_end_x {
+            if stripe >= 0 && stripe < screen_w as i32 {
+                // Vérifie si sprite est devant le mur (z-buffer check)
+                if transform_y < self.rays.rays[stripe as usize].dist {
+                    let dst_rect = Rect::new(
+                        stripe,
+                        draw_start_y,
+                        1, // une colonne de large
+                        (draw_end_y - draw_start_y) as u32,
+                    );
+
+                    let tex_x = ((stripe - draw_start_x) * 64 / sprite_width) as i32;
+                    let src_rect = Rect::new(tex_x, 0, 1, 64);
+
+                    canvas.copy(&*texture, src_rect, dst_rect)?;
+                }
+            }
+        }
+
         Ok(())
     }
 }
