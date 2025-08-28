@@ -1,5 +1,3 @@
-use std::num::FpCategory;
-
 use sdl2::{pixels::Color, rect::FPoint};
 
 use crate::{ display};
@@ -45,7 +43,7 @@ impl display::Display for Minimap {
         &mut self,
         canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
         _textures: Option<&crate::TextureManager<'l,T>>
-    ) -> Result<(),String> {
+    ) -> Result<(), String> {
 
         let viewport = canvas.viewport();
         let vp_w = viewport.width() as i32;
@@ -53,7 +51,6 @@ impl display::Display for Minimap {
 
         // fond
         canvas.set_draw_color(self.bg_color);
-        // canvas.clear();
 
         // position de la target en pixels
         let target_px_x = (self.target.x * self.wall_size as f32) as i32;
@@ -86,6 +83,21 @@ impl display::Display for Minimap {
                 (self.wall_size / 2) as u32
             );
             canvas.set_draw_color(color);
+            canvas.fill_rect(rect)?;
+        }
+
+        // affichage des autres
+        canvas.set_draw_color(self.others_color);
+        for other in &self.others {
+            let other_px_x = (other.x * self.wall_size as f32) as i32 + offset_x;
+            let other_px_y = (other.y * self.wall_size as f32) as i32 + offset_y;
+
+            let rect = sdl2::rect::Rect::new(
+                other_px_x - (self.wall_size as i32 / 4),
+                other_px_y - (self.wall_size as i32 / 4),
+                (self.wall_size / 2) as u32,
+                (self.wall_size / 2) as u32
+            );
             canvas.fill_rect(rect)?;
         }
 
