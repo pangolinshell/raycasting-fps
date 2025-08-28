@@ -37,7 +37,6 @@ fn event(e:&mut EventPump) -> u32{
 }
 
 fn main() -> Result<(),Box<dyn Error>> {
-
     let all_screen = Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT + HUD_HEIGHT);
     let render_zone = Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     let minimap_zone = Rect::new(0, SCREEN_HEIGHT as i32 + 1 , HUD_HEIGHT, HUD_HEIGHT);
@@ -52,7 +51,7 @@ fn main() -> Result<(),Box<dyn Error>> {
     let sdl = sdl2::init()?;
     let mut event_pump = sdl.event_pump()?;
     let window = window_init(WIN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT + HUD_HEIGHT, sdl)?;
-    let mut canvas = window.into_canvas().accelerated().build()?;
+    let mut canvas = window.clone().into_canvas().accelerated().build()?;
     let texture_creator = canvas.texture_creator();
 
     let mut texture_manager = TextureManager::new(&texture_creator);
